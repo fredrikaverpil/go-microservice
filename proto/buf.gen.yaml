@@ -1,32 +1,39 @@
-version: v1
+version: v2
+managed:
+  enabled: true
 plugins:
   # go
-  - plugin: go
+  # https://buf.build/protocolbuffers/go
+  - remote: buf.build/protocolbuffers/go
     out: gen/go
     opt:
       - paths=source_relative
-  - plugin: go
+  - remote: buf.build/protocolbuffers/go
     out: ../internal/proto/gen/go
     opt:
       - paths=source_relative
-  # grpc
-  - plugin: go-grpc
+  # grpc-go
+  # https://buf.build/grpc/go
+  - remote: buf.build/grpc/go
     out: gen/go
     opt:
       - paths=source_relative
-  - plugin: go-grpc
+  - remote: buf.build/grpc/go
     out: ../internal/proto/gen/go
     opt:
       - paths=source_relative
   # grpc-gateway
-  - plugin: grpc-gateway
+  # https://buf.build/grpc-ecosystem/gateway
+  # depends on protocolbuffers, grpc-go
+  - remote: buf.build/grpc-ecosystem/gateway
     out: gen/go
     opt:
       - paths=source_relative
-  - plugin: grpc-gateway
+  - remote: buf.build/grpc-ecosystem/gateway
     out: ../internal/proto/gen/go
     opt:
       - paths=source_relative
   # openapiv2
-  - plugin: openapiv2
+  # https://buf.build/grpc-ecosystem/openapiv2
+  - remote: buf.build/grpc-ecosystem/openapiv2
     out: gen/openapiv2
