@@ -4,6 +4,8 @@
 
 ### Buf and protos setup
 
+#### Write protos
+
 - Add proto(s) into `proto/gomicroservice/v1`.
 - Read the
   [buf tutorial](https://buf.build/docs/tutorials/getting-started-with-buf-cli#update-directory-path-and-build-module).
@@ -14,3 +16,16 @@
   generated.
 - Run `buf lint` to make sure the proto is valid. Add dependencies and modify
   proto file as to satisfy the linter and AIP rules.
+
+#### Generate go code
+
+- Install dependencies:
+
+  ```bash
+  go install google.golang.org/protobuf/cmd/protoc-gen-go@latest  # non-gRPC go code
+  go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest # gRPC go code
+  go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway@latest
+  go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2@latest
+  ```
+
+- Add
