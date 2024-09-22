@@ -28,4 +28,5 @@
   go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2@latest
   ```
 
-- Add
+- Add plugins and configure them in `buf.gen.yaml`.
+- Run `buf generate` to run codegen.
