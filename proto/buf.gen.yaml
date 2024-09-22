@@ -37,3 +37,9 @@ plugins:
   # https://buf.build/grpc-ecosystem/openapiv2
   - remote: buf.build/grpc-ecosystem/openapiv2
     out: gen/openapiv2
+  # gnostic
+  # https://buf.build/community/google-gnostic-openapi
+  - remote: buf.build/community/google-gnostic-openapi
+    out: gen/gnostic
+    opt:
+      - paths=source_relative
