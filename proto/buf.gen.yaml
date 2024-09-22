@@ -1,16 +1,32 @@
 version: v1
 plugins:
+  # go
   - plugin: go
     out: gen/go
     opt:
       - paths=source_relative
+  - plugin: go
+    out: ../internal/proto/gen/go
+    opt:
+      - paths=source_relative
+  # grpc
   - plugin: go-grpc
     out: gen/go
     opt:
       - paths=source_relative
+  - plugin: go-grpc
+    out: ../internal/proto/gen/go
+    opt:
+      - paths=source_relative
+  # grpc-gateway
   - plugin: grpc-gateway
     out: gen/go
     opt:
       - paths=source_relative
+  - plugin: grpc-gateway
+    out: ../internal/proto/gen/go
+    opt:
+      - paths=source_relative
+  # openapiv2
   - plugin: openapiv2
     out: gen/openapiv2

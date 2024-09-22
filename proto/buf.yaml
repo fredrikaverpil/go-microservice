@@ -1,8 +1,7 @@
 # For details on buf.yaml configuration, visit https://buf.build/docs/configuration/v2/buf-yaml
 version: v2
 modules:
-  - path: . # read by external apps
-    # - path: ../../../internal/proto  # read internally
+  - path: .
 deps:
   - buf.build/googleapis/googleapis
   - buf.build/protocolbuffers/wellknowntypes
