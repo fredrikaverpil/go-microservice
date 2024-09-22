@@ -17,7 +17,9 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: 1.23
-      - name: lint
-        run: |
-          make tools
-          make lint
+      - name: install tools
+        run: make tools
+      - name: buf lint
+        run: make buf-lint
+      - name: AIP lint
+        run: make api-lint
