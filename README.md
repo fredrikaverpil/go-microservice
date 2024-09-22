@@ -36,5 +36,4 @@
 
 #### To do
 
-- Add protovalidate.
 - Add AIP tests.

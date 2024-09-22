@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package gomicroservice.v1;
 
+import "buf/validate/validate.proto";
 import "google/api/annotations.proto";
 import "google/api/client.proto";
 import "google/api/field_behavior.proto";
@@ -71,7 +72,10 @@ message User {
 
   // The resource name of the user.
   // Format: users/{user_id}
-  string name = 1 [(google.api.field_behavior) = IDENTIFIER];
+  string name = 1 [
+    (google.api.field_behavior) = IDENTIFIER,
+    (buf.validate.field).string.min_len = 1
+  ];
 
   // The display name of the user.
   string display_name = 2 [(google.api.field_behavior) = REQUIRED];
