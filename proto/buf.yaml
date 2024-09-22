@@ -5,6 +5,7 @@ modules:
     # - path: ../../../internal/proto  # read internally
 deps:
   - buf.build/googleapis/googleapis
+  - buf.build/protocolbuffers/wellknowntypes
 lint:
   use:
     - STANDARD

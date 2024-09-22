@@ -16,7 +16,7 @@ service UserService {
   // Creates a new user.
   //
   // This follows the AIP-133 standard for Create methods.
-  rpc CreateUser(CreateUserRequest) returns (User) {
+  rpc CreateUser(CreateUserRequest) returns (CreateUserResponse) {
     option (google.api.http) = {
       post: "/v1/users"
       body: "user"
@@ -26,7 +26,7 @@ service UserService {
   // Gets a user.
   //
   // This follows the AIP-131 standard for Get methods.
-  rpc GetUser(GetUserRequest) returns (User) {
+  rpc GetUser(GetUserRequest) returns (GetUserResponse) {
     option (google.api.http) = {get: "/v1/{name=users/*}"};
   }
 
@@ -40,7 +40,7 @@ service UserService {
   // Updates a user.
   //
   // This follows the AIP-134 standard for Update methods.
-  rpc UpdateUser(UpdateUserRequest) returns (User) {
+  rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse) {
     option (google.api.http) = {
       patch: "/v1/{user.name=users/*}"
       body: "user"
@@ -50,7 +50,7 @@ service UserService {
   // Deletes a user.
   //
   // This follows the AIP-135 standard for Delete methods.
-  rpc DeleteUser(DeleteUserRequest) returns (google.protobuf.Empty) {
+  rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse) {
     option (google.api.http) = {delete: "/v1/{name=users/*}"};
   }
 }
@@ -85,6 +85,12 @@ message CreateUserRequest {
   User user = 1 [(google.api.field_behavior) = REQUIRED];
 }
 
+// Response message for CreateUser method.
+message CreateUserResponse {
+  // The created user.
+  User user = 1;
+}
+
 // Request message for GetUser method.
 message GetUserRequest {
   // The resource name of the user to retrieve.
@@ -93,6 +99,12 @@ message GetUserRequest {
     (google.api.field_behavior) = REQUIRED,
     (google.api.resource_reference) = {type: "gomicroservice.v1.User"}
   ];
+}
+
+// Response message for GetUser method.
+message GetUserResponse {
+  // The requested user.
+  User user = 1;
 }
 
 // Request message for ListUsers method.
@@ -130,6 +142,12 @@ message UpdateUserRequest {
   google.protobuf.FieldMask update_mask = 2;
 }
 
+// Response message for UpdateUser method.
+message UpdateUserResponse {
+  // The updated user.
+  User user = 1;
+}
+
 // Request message for DeleteUser method.
 message DeleteUserRequest {
   // The resource name of the user to delete.
@@ -138,4 +156,10 @@ message DeleteUserRequest {
     (google.api.field_behavior) = REQUIRED,
     (google.api.resource_reference) = {type: "gomicroservice.v1.User"}
   ];
+}
+
+// Response message for DeleteUser method.
+message DeleteUserResponse {
+  // This response is empty, following AIP-135 for Delete methods.
+  google.protobuf.Empty result = 1;
 }
