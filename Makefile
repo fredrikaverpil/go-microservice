@@ -22,3 +22,6 @@ tools:
 proto:
 	cd proto && buf lint && buf generate
 
+.PHONY: lint
+lint:
+	cd proto && buf lint
