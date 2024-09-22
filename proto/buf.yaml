@@ -8,6 +8,11 @@ deps:
 lint:
   use:
     - STANDARD
+  except:
+    # ignore the following 'buf lint' rules as they conflict with AIP rules
+    - RPC_RESPONSE_STANDARD_NAME
+    - RPC_REQUEST_RESPONSE_UNIQUE
+    - ENUM_VALUE_PREFIX
 breaking:
   use:
     - FILE

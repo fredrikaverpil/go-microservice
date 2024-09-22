@@ -30,3 +30,11 @@
 
 - Add plugins and configure them in `buf.gen.yaml`.
 - Run `buf generate` to run codegen.
+- Add api-linter (for AIP). Add `go install ...` command.
+- Run linter and add the `client.proto` import for api methods, fix various
+  issues.
+
+#### To do
+
+- Add protovalidate.
+- Add AIP tests.
