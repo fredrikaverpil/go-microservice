@@ -1,0 +1,128 @@
+syntax = "proto3";
+
+package gomicroservice.v1;
+
+import "google/api/annotations.proto";
+import "google/api/field_behavior.proto";
+import "google/api/resource.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/field_mask.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/fredrikaverpil/go-microservice/gen/go/gomicroservice/v1;gomicroservicev1";
+
+// Manages user resources.
+service UserService {
+  // Creates a new user.
+  //
+  // This follows the AIP-133 standard for Create methods.
+  rpc CreateUser(CreateUserRequest) returns (User) {
+    option (google.api.http) = {
+      post: "/v1/users"
+      body: "user"
+    };
+  }
+
+  // Gets a user.
+  //
+  // This follows the AIP-131 standard for Get methods.
+  rpc GetUser(GetUserRequest) returns (User) {
+    option (google.api.http) = {get: "/v1/users/{name=users/*}"};
+  }
+
+  // Lists users.
+  //
+  // This follows the AIP-132 standard for List methods.
+  rpc ListUsers(ListUsersRequest) returns (ListUsersResponse) {
+    option (google.api.http) = {get: "/v1/users"};
+  }
+
+  // Updates a user.
+  //
+  // This follows the AIP-134 standard for Update methods.
+  rpc UpdateUser(UpdateUserRequest) returns (User) {
+    option (google.api.http) = {
+      patch: "/v1/users/{user.name=users/*}"
+      body: "user"
+    };
+  }
+
+  // Deletes a user.
+  //
+  // This follows the AIP-135 standard for Delete methods.
+  rpc DeleteUser(DeleteUserRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {delete: "/v1/users/{name=users/*}"};
+  }
+}
+
+// A user resource.
+message User {
+  // The resource name of the user.
+  // Format: users/{user_id}
+  string name = 1 [(google.api.field_behavior) = REQUIRED];
+
+  // The display name of the user.
+  string display_name = 2 [(google.api.field_behavior) = REQUIRED];
+
+  // The email address of the user.
+  string email = 3 [(google.api.field_behavior) = REQUIRED];
+
+  // The creation time of the user.
+  google.protobuf.Timestamp create_time = 4 [(google.api.field_behavior) = OUTPUT_ONLY];
+
+  // The last update time of the user.
+  google.protobuf.Timestamp update_time = 5 [(google.api.field_behavior) = OUTPUT_ONLY];
+}
+
+// Request message for CreateUser method.
+message CreateUserRequest {
+  // The user to create.
+  User user = 1 [(google.api.field_behavior) = REQUIRED];
+}
+
+// Request message for GetUser method.
+message GetUserRequest {
+  // The resource name of the user to retrieve.
+  // Format: users/{user_id}
+  string name = 1 [
+    (google.api.field_behavior) = REQUIRED,
+    (google.api.resource_reference) = {type: "gomicroservice.v1.User"}
+  ];
+}
+
+// Request message for ListUsers method.
+message ListUsersRequest {
+  // The maximum number of users to return.
+  int32 page_size = 1;
+
+  // The next_page_token value returned from a previous List request, if any.
+  string page_token = 2;
+}
+
+// Response message for ListUsers method.
+message ListUsersResponse {
+  // The list of users.
+  repeated User users = 1;
+
+  // A token to retrieve the next page of results, or empty if there are no more results.
+  string next_page_token = 2;
+}
+
+// Request message for UpdateUser method.
+message UpdateUserRequest {
+  // The user to update.
+  User user = 1 [(google.api.field_behavior) = REQUIRED];
+
+  // The list of fields to update.
+  google.protobuf.FieldMask update_mask = 2;
+}
+
+// Request message for DeleteUser method.
+message DeleteUserRequest {
+  // The resource name of the user to delete.
+  // Format: users/{user_id}
+  string name = 1 [
+    (google.api.field_behavior) = REQUIRED,
+    (google.api.resource_reference) = {type: "gomicroservice.v1.User"}
+  ];
+}
