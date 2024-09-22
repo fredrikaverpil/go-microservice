@@ -27,7 +27,7 @@ service UserService {
   //
   // This follows the AIP-131 standard for Get methods.
   rpc GetUser(GetUserRequest) returns (User) {
-    option (google.api.http) = {get: "/v1/users/{name=users/*}"};
+    option (google.api.http) = {get: "/v1/{name=users/*}"};
   }
 
   // Lists users.
@@ -42,7 +42,7 @@ service UserService {
   // This follows the AIP-134 standard for Update methods.
   rpc UpdateUser(UpdateUserRequest) returns (User) {
     option (google.api.http) = {
-      patch: "/v1/users/{user.name=users/*}"
+      patch: "/v1/{user.name=users/*}"
       body: "user"
     };
   }
@@ -51,12 +51,17 @@ service UserService {
   //
   // This follows the AIP-135 standard for Delete methods.
   rpc DeleteUser(DeleteUserRequest) returns (google.protobuf.Empty) {
-    option (google.api.http) = {delete: "/v1/users/{name=users/*}"};
+    option (google.api.http) = {delete: "/v1/{name=users/*}"};
   }
 }
 
 // A user resource.
 message User {
+  option (google.api.resource) = {
+    type: "gomicroservice.v1.User"
+    pattern: "users/{user_id}"
+  };
+
   // The resource name of the user.
   // Format: users/{user_id}
   string name = 1 [(google.api.field_behavior) = REQUIRED];
@@ -97,6 +102,14 @@ message ListUsersRequest {
 
   // The next_page_token value returned from a previous List request, if any.
   string page_token = 2;
+
+  // A string value to restrict results based on a specific field.
+  // For example: "display_name=John" or "email=john@example.com"
+  string filter = 3;
+
+  // Specifies the ordering of results.
+  // For example: "create_time desc" or "display_name asc"
+  string order_by = 4;
 }
 
 // Response message for ListUsers method.
