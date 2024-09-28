@@ -34,6 +34,10 @@
 - Run linter and add the `client.proto` import for api methods, fix various
   issues.
 
-#### To do
+### To do
 
-- Add AIP tests.
+#### Buf config
+
+- Add
+  [protoc-gen-go-aip-test](https://github.com/einride/protoc-gen-go-aip-test)
+- Add [aip-cli-go](https://github.com/einride/aip-cli-go)
