@@ -48,3 +48,13 @@ api-lint:
 buf-generate:
 	cd proto && buf lint && buf generate
 
+# --- openapi ---
+
+.PHONY: openapi-tools
+openapi-tools:
+	go install github.com/getkin/kin-openapi/cmd/validate@latest
+
+.PHONY: openapi-lint
+openapi-lint:
+	go run github.com/getkin/kin-openapi/cmd/validate@latest proto/gen/openapiv3/openapi.yaml
+	
