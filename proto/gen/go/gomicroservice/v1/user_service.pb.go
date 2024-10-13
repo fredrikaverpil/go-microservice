@@ -219,7 +219,9 @@ type ListUsersRequest struct {
 	// The next_page_token value returned from a previous List request, if any.
 	PageToken string `protobuf:"bytes,2,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
 	// A string value to restrict results based on a specific field.
-	// For example: "display_name=John" or "email=john@example.com"
+	// For example:
+	// display_name=John
+	// email=johnexample.com
 	Filter        string `protobuf:"bytes,3,opt,name=filter,proto3" json:"filter,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache

@@ -28,7 +28,7 @@ type GRPCServer struct {
 func NewGRPCServer(
 	port string,
 	logger *slog.Logger,
-	validator *protovalidate.Validator,
+	validator protovalidate.Validator,
 ) (*GRPCServer, error) {
 	// Create server with interceptors
 	grpcServer := grpc.NewServer(

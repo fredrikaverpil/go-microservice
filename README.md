@@ -70,6 +70,48 @@ curl -X PATCH -H "Content-Type: application/json" \
 curl -X DELETE http://localhost:8080/v1/users/user123
 ```
 
+#### REST APIs with Swagger UI
+
+```sh
+# run swagger ui
+go run cmd/openapi/main.go
+
+# run server
+go run cmd/server/main.go
+```
+
+Please note that the `cmd/openapi/swagger-ui/swagger-initializer.js` needs to
+contain the openapi yaml and the instruction to call `localhost:8080`:
+
+```js
+window.onload = function () {
+  //<editor-fold desc="Changeable Configuration Block">
+
+  // the following lines will be replaced by docker/configurator, when it runs in a docker-container
+  window.ui = SwaggerUIBundle({
+    url: "/api/openapi.yaml",
+    dom_id: "#swagger-ui",
+    deepLinking: true,
+    presets: [SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset],
+    plugins: [SwaggerUIBundle.plugins.DownloadUrl],
+    layout: "StandaloneLayout",
+
+    requestInterceptor: function (req) {
+      // Only modify actual API requests, not the initial spec loading
+      if (!req.url.endsWith(".yaml") && !req.url.endsWith(".json")) {
+        req.url = req.url.replace(
+          window.location.origin,
+          "http://localhost:8080",
+        );
+      }
+      return req;
+    },
+  });
+
+  //</editor-fold>
+};
+```
+
 ## Captain's log
 
 ### Buf and protos setup
