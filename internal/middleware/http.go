@@ -67,18 +67,3 @@ func loggingMiddleware(logger *slog.Logger) HTTPMiddleware {
 		})
 	}
 }
-
-// Example of how to add a new middleware:
-/*
-func rateLimitMiddleware(rps int) HTTPMiddleware {
-	limiter := rate.NewLimiter(rate.Limit(rps), rps)
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if !limiter.Allow() {
-				http.Error(w, "rate limit exceeded", http.StatusTooManyRequests)
-				return
-			}
-			next.ServeHTTP(w, r)
-		})
-	}
-}
