@@ -50,5 +50,9 @@ buf-generate:
 
 .PHONY: run-server
 run-server:
-	go run cmd/server/main.go
+	GO_ENV=development go run cmd/server/main.go
+
+.PHONY: run-server-prod
+run-server-prod:
+	GO_ENV=production go run cmd/server/main.go
 

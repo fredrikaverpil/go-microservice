@@ -4,9 +4,11 @@ import (
 	"log/slog"
 	"net"
 
+	"github.com/fredrikaverpil/go-microservice/internal/config"
 	pb "github.com/fredrikaverpil/go-microservice/internal/proto/gen/go/gomicroservice/v1"
 	"github.com/fredrikaverpil/go-microservice/internal/service"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 type GRPCServer struct {
@@ -22,6 +24,12 @@ func NewGRPCServer(port string, logger *slog.Logger) *GRPCServer {
 
 	// Register the user service
 	pb.RegisterUserServiceServer(grpcServer, userService)
+
+	// Enable reflection only in development
+	if config.IsDevelopment() {
+		reflection.Register(grpcServer)
+		logger.Info("gRPC reflection enabled")
+	}
 
 	return &GRPCServer{
 		server:      grpcServer,
