@@ -8,6 +8,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/bufbuild/protovalidate-go"
 	"github.com/fredrikaverpil/go-microservice/internal/server"
 )
 
@@ -22,8 +23,15 @@ func main() {
 		Level: slog.LevelInfo,
 	}))
 
+	// Initialize proto validator
+	validator, err := protovalidate.New()
+	if err != nil {
+		logger.Error("Failed to create proto validator", "error", err)
+		os.Exit(1)
+	}
+
 	// Initialize gRPC server
-	grpcServer, err := server.NewGRPCServer(grpcPort, logger)
+	grpcServer, err := server.NewGRPCServer(grpcPort, logger, validator)
 	if err != nil {
 		logger.Error("Failed to create gRPC server", "error", err)
 		os.Exit(1)

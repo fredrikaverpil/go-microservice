@@ -9,8 +9,15 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-// UnaryServerLoggingInterceptor returns a new unary server interceptor that logs requests and responses
-func UnaryServerLoggingInterceptor(logger *slog.Logger) grpc.UnaryServerInterceptor {
+// UnaryServerInterceptors returns a slice of unary server interceptors
+func UnaryServerInterceptors(logger *slog.Logger) []grpc.UnaryServerInterceptor {
+	return []grpc.UnaryServerInterceptor{
+		unaryLoggingInterceptor(logger),
+	}
+}
+
+// unaryLoggingInterceptor returns a new unary server interceptor that logs requests and responses
+func unaryLoggingInterceptor(logger *slog.Logger) grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 		start := time.Now()
 

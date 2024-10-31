@@ -17,7 +17,10 @@ type GatewayServer struct {
 	logger *slog.Logger
 }
 
-func NewGatewayServer(port, grpcPort string, logger *slog.Logger) (*GatewayServer, error) {
+func NewGatewayServer(
+	port, grpcPort string,
+	logger *slog.Logger,
+) (*GatewayServer, error) {
 	ctx := context.Background()
 	mux := runtime.NewServeMux()
 
@@ -28,12 +31,12 @@ func NewGatewayServer(port, grpcPort string, logger *slog.Logger) (*GatewayServe
 		return nil, err
 	}
 
-	// Wrap mux with logging middleware
-	loggingHandler := middleware.HTTPLoggingMiddleware(logger, mux)
+	// Wrap mux with middleware chain (logging only)
+	handler := middleware.Chain(middleware.HTTPServerMiddlewares(logger)...)(mux)
 
 	server := &http.Server{
 		Addr:    ":" + port,
-		Handler: loggingHandler,
+		Handler: handler,
 	}
 
 	return &GatewayServer{

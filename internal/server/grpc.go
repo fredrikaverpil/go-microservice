@@ -1,7 +1,6 @@
 package server
 
 import (
-	"fmt"
 	"log/slog"
 	"net"
 
@@ -21,19 +20,17 @@ type GRPCServer struct {
 	logger *slog.Logger
 }
 
-func NewGRPCServer(port string, logger *slog.Logger) (*GRPCServer, error) {
-	// Create proto validator
-	validator, err := protovalidate.New()
-	if err != nil {
-		return nil, fmt.Errorf("failed to create validator: %w", err)
-	}
-
-	// Create server with logging interceptor
+func NewGRPCServer(
+	port string,
+	logger *slog.Logger,
+	validator *protovalidate.Validator,
+) (*GRPCServer, error) {
+	// Create server with interceptors
 	grpcServer := grpc.NewServer(
-		grpc.UnaryInterceptor(middleware.UnaryServerLoggingInterceptor(logger)),
+		grpc.ChainUnaryInterceptor(middleware.UnaryServerInterceptors(logger)...),
 	)
 
-	// Create service and handler with logger
+	// Create service and handler
 	userService := service.NewUserService(logger)
 	userHandler := handler.NewGRPCHandler(userService, validator)
 
