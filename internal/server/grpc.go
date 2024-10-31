@@ -5,6 +5,7 @@ import (
 	"net"
 
 	"github.com/fredrikaverpil/go-microservice/internal/config"
+	"github.com/fredrikaverpil/go-microservice/internal/handlers"
 	pb "github.com/fredrikaverpil/go-microservice/internal/proto/gen/go/gomicroservice/v1"
 	"github.com/fredrikaverpil/go-microservice/internal/service"
 	"google.golang.org/grpc"
@@ -12,30 +13,31 @@ import (
 )
 
 type GRPCServer struct {
-	server      *grpc.Server
-	port        string
-	logger      *slog.Logger
-	userService *service.UserService
+	server *grpc.Server
+	port   string
+	logger *slog.Logger
 }
 
 func NewGRPCServer(port string, logger *slog.Logger) *GRPCServer {
 	grpcServer := grpc.NewServer()
-	userService := service.NewUserService()
 
-	// Register the user service
-	pb.RegisterUserServiceServer(grpcServer, userService)
+	// Create service and handler with logger
+	userService := service.NewUserService(logger)
+	userHandler := handlers.NewGRPCHandler(userService)
 
-	// Enable reflection only in development
+	// Register handler
+	pb.RegisterUserServiceServer(grpcServer, userHandler)
+
+	// Enable reflection in development
 	if config.IsDevelopment() {
 		reflection.Register(grpcServer)
 		logger.Info("gRPC reflection enabled")
 	}
 
 	return &GRPCServer{
-		server:      grpcServer,
-		port:        port,
-		logger:      logger,
-		userService: userService,
+		server: grpcServer,
+		port:   port,
+		logger: logger,
 	}
 }
 

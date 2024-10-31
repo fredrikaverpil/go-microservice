@@ -1,5 +1,66 @@
 # go-microservice
 
+## Quickstart
+
+```bash
+# install deps
+make
+# run server
+make run-server
+```
+
+### Calling endpoints
+
+#### gRPC APIs with grpcurl
+
+```bash
+# List all available services
+grpcurl -plaintext localhost:50051 list
+
+# Create a user
+grpcurl -plaintext -d '{"user":{"display_name":"John Doe","email":"john@example.com"}}' \
+  localhost:50051 gomicroservice.v1.UserService/CreateUser
+
+# Get a user
+grpcurl -plaintext -d '{"name":"users/user123"}' \
+  localhost:50051 gomicroservice.v1.UserService/GetUser
+
+# List users
+grpcurl -plaintext -d '{"page_size":10}' \
+  localhost:50051 gomicroservice.v1.UserService/ListUsers
+
+# Update a user
+grpcurl -plaintext -d '{"user":{"name":"users/user123","display_name":"John Smith"}}' \
+  localhost:50051 gomicroservice.v1.UserService/UpdateUser
+
+# Delete a user
+grpcurl -plaintext -d '{"name":"users/user123"}' \
+  localhost:50051 gomicroservice.v1.UserService/DeleteUser
+```
+
+#### REST APIs with curl
+
+```bash
+# Create a user
+curl -X POST -H "Content-Type: application/json" \
+  -d '{"user":{"display_name":"John Doe","email":"john@example.com"}}' \
+  http://localhost:8080/v1/users
+
+# Get a user
+curl http://localhost:8080/v1/users/user123
+
+# List users
+curl http://localhost:8080/v1/users
+
+# Update a user
+curl -X PATCH -H "Content-Type: application/json" \
+  -d '{"user":{"display_name":"John Smith"},"update_mask":{"paths":["display_name"]}}' \
+  http://localhost:8080/v1/users/user123
+
+# Delete a user
+curl -X DELETE http://localhost:8080/v1/users/user123
+```
+
 ## Captain's log
 
 ### Buf and protos setup

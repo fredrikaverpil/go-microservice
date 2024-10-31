@@ -2,46 +2,70 @@ package service
 
 import (
 	"context"
+	"log/slog"
 
-	pb "github.com/fredrikaverpil/go-microservice/internal/proto/gen/go/gomicroservice/v1"
-	"google.golang.org/protobuf/types/known/emptypb"
+	"github.com/fredrikaverpil/go-microservice/internal/domain"
+	"github.com/fredrikaverpil/go-microservice/internal/ports"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type UserService struct {
-	pb.UnimplementedUserServiceServer
+	logger *slog.Logger
 }
 
-func NewUserService() *UserService {
-	return &UserService{}
+func NewUserService(logger *slog.Logger) ports.UserService {
+	return &UserService{
+		logger: logger,
+	}
 }
 
-func (s *UserService) CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.User, error) {
-	// TODO: Implement creation logic
-	return &pb.User{}, nil
+func (s *UserService) CreateUser(ctx context.Context, user *domain.User) (*domain.User, error) {
+	err := status.Errorf(codes.Unimplemented, "method CreateUser not implemented")
+	s.logger.Error("failed to create user",
+		"error", err,
+		"user", user.Name,
+	)
+	return nil, err
 }
 
-func (s *UserService) GetUser(ctx context.Context, req *pb.GetUserRequest) (*pb.User, error) {
-	// TODO: Implement get logic
-	return &pb.User{}, nil
+func (s *UserService) GetUser(ctx context.Context, name string) (*domain.User, error) {
+	err := status.Errorf(codes.Unimplemented, "method GetUser not implemented")
+	s.logger.Error("failed to get user",
+		"error", err,
+		"name", name,
+	)
+	return nil, err
 }
 
 func (s *UserService) ListUsers(
 	ctx context.Context,
-	req *pb.ListUsersRequest,
-) (*pb.ListUsersResponse, error) {
-	// TODO: Implement list logic
-	return &pb.ListUsersResponse{}, nil
+	pageSize int32,
+	pageToken string,
+) ([]*domain.User, string, error) {
+	err := status.Errorf(codes.Unimplemented, "method ListUsers not implemented")
+	s.logger.Error("failed to list users",
+		"error", err,
+		"pageSize", pageSize,
+		"pageToken", pageToken,
+	)
+	return nil, "", err
 }
 
-func (s *UserService) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest) (*pb.User, error) {
-	// TODO: Implement update logic
-	return &pb.User{}, nil
+func (s *UserService) UpdateUser(ctx context.Context, user *domain.User) (*domain.User, error) {
+	err := status.Errorf(codes.Unimplemented, "method UpdateUser not implemented")
+	s.logger.Error("failed to update user",
+		"error", err,
+		"user", user.Name,
+	)
+	return nil, err
 }
 
-func (s *UserService) DeleteUser(
-	ctx context.Context,
-	req *pb.DeleteUserRequest,
-) (*emptypb.Empty, error) {
-	// TODO: Implement delete logic
-	return &emptypb.Empty{}, nil
+func (s *UserService) DeleteUser(ctx context.Context, name string) error {
+	err := status.Errorf(codes.Unimplemented, "method DeleteUser not implemented")
+	s.logger.Error("failed to delete user",
+		"error", err,
+		"name", name,
+	)
+	return err
 }
