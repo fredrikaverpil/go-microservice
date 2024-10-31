@@ -1,9 +1,11 @@
 package server
 
 import (
+	"fmt"
 	"log/slog"
 	"net"
 
+	"github.com/bufbuild/protovalidate-go"
 	"github.com/fredrikaverpil/go-microservice/internal/config"
 	"github.com/fredrikaverpil/go-microservice/internal/handler"
 	"github.com/fredrikaverpil/go-microservice/internal/middleware"
@@ -19,7 +21,13 @@ type GRPCServer struct {
 	logger *slog.Logger
 }
 
-func NewGRPCServer(port string, logger *slog.Logger) *GRPCServer {
+func NewGRPCServer(port string, logger *slog.Logger) (*GRPCServer, error) {
+	// Create proto validator
+	validator, err := protovalidate.New()
+	if err != nil {
+		return nil, fmt.Errorf("failed to create validator: %w", err)
+	}
+
 	// Create server with logging interceptor
 	grpcServer := grpc.NewServer(
 		grpc.UnaryInterceptor(middleware.UnaryServerLoggingInterceptor(logger)),
@@ -27,7 +35,7 @@ func NewGRPCServer(port string, logger *slog.Logger) *GRPCServer {
 
 	// Create service and handler with logger
 	userService := service.NewUserService(logger)
-	userHandler := handler.NewGRPCHandler(userService)
+	userHandler := handler.NewGRPCHandler(userService, validator)
 
 	// Register handler
 	pb.RegisterUserServiceServer(grpcServer, userHandler)
@@ -42,7 +50,7 @@ func NewGRPCServer(port string, logger *slog.Logger) *GRPCServer {
 		server: grpcServer,
 		port:   port,
 		logger: logger,
-	}
+	}, nil
 }
 
 func (s *GRPCServer) Start() error {

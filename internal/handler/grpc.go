@@ -4,6 +4,7 @@ import (
 	"context"
 	"strings"
 
+	"github.com/bufbuild/protovalidate-go"
 	"github.com/fredrikaverpil/go-microservice/internal/domain"
 	"github.com/fredrikaverpil/go-microservice/internal/port"
 	pb "github.com/fredrikaverpil/go-microservice/internal/proto/gen/go/gomicroservice/v1"
@@ -16,16 +17,22 @@ import (
 type GRPCHandler struct {
 	pb.UnimplementedUserServiceServer
 	userService port.UserService
+	validator   *protovalidate.Validator
 }
 
-func NewGRPCHandler(userService port.UserService) *GRPCHandler {
+func NewGRPCHandler(userService port.UserService, validator *protovalidate.Validator) *GRPCHandler {
 	return &GRPCHandler{
 		userService: userService,
+		validator:   validator,
 	}
 }
 
 // CreateUser implements AIP-133
 func (h *GRPCHandler) CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.User, error) {
+	if err := h.validator.Validate(req); err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
 	if req.GetUser() == nil {
 		return nil, status.Error(codes.InvalidArgument, "user is required")
 	}
@@ -50,6 +57,10 @@ func (h *GRPCHandler) CreateUser(ctx context.Context, req *pb.CreateUserRequest)
 
 // GetUser implements AIP-131
 func (h *GRPCHandler) GetUser(ctx context.Context, req *pb.GetUserRequest) (*pb.User, error) {
+	if err := h.validator.Validate(req); err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
 	if !strings.HasPrefix(req.GetName(), "users/") {
 		return nil, status.Error(codes.InvalidArgument, "name must start with 'users/'")
 	}
@@ -67,6 +78,10 @@ func (h *GRPCHandler) ListUsers(
 	ctx context.Context,
 	req *pb.ListUsersRequest,
 ) (*pb.ListUsersResponse, error) {
+	if err := h.validator.Validate(req); err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
 	pageSize := int32(10) // Default page size
 	if req.GetPageSize() > 0 {
 		pageSize = req.GetPageSize()
@@ -90,6 +105,10 @@ func (h *GRPCHandler) ListUsers(
 
 // UpdateUser implements AIP-134
 func (h *GRPCHandler) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest) (*pb.User, error) {
+	if err := h.validator.Validate(req); err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
 	if req.GetUser() == nil {
 		return nil, status.Error(codes.InvalidArgument, "user is required")
 	}
@@ -113,6 +132,10 @@ func (h *GRPCHandler) DeleteUser(
 	ctx context.Context,
 	req *pb.DeleteUserRequest,
 ) (*emptypb.Empty, error) {
+	if err := h.validator.Validate(req); err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
 	if !strings.HasPrefix(req.GetName(), "users/") {
 		return nil, status.Error(codes.InvalidArgument, "name must start with 'users/'")
 	}

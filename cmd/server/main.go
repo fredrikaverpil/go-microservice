@@ -23,7 +23,11 @@ func main() {
 	}))
 
 	// Initialize gRPC server
-	grpcServer := server.NewGRPCServer(grpcPort, logger)
+	grpcServer, err := server.NewGRPCServer(grpcPort, logger)
+	if err != nil {
+		logger.Error("Failed to create gRPC server", "error", err)
+		os.Exit(1)
+	}
 
 	// Initialize HTTP gateway server
 	gatewayServer, err := server.NewGatewayServer(httpPort, grpcPort, logger)
