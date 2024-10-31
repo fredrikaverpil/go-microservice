@@ -24,7 +24,10 @@ func NewGatewayServer(
 	ctx := context.Background()
 	mux := runtime.NewServeMux()
 
-	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
+	// Create client connection to gRPC server
+	opts := []grpc.DialOption{
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	}
 	endpoint := "localhost:" + grpcPort
 
 	if err := gomicroservicev1.RegisterUserServiceHandlerFromEndpoint(ctx, mux, endpoint, opts); err != nil {
