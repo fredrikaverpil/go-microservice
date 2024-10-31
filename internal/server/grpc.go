@@ -5,7 +5,7 @@ import (
 	"net"
 
 	"github.com/fredrikaverpil/go-microservice/internal/config"
-	"github.com/fredrikaverpil/go-microservice/internal/handlers"
+	"github.com/fredrikaverpil/go-microservice/internal/handler"
 	"github.com/fredrikaverpil/go-microservice/internal/middleware"
 	pb "github.com/fredrikaverpil/go-microservice/internal/proto/gen/go/gomicroservice/v1"
 	"github.com/fredrikaverpil/go-microservice/internal/service"
@@ -27,7 +27,7 @@ func NewGRPCServer(port string, logger *slog.Logger) *GRPCServer {
 
 	// Create service and handler with logger
 	userService := service.NewUserService(logger)
-	userHandler := handlers.NewGRPCHandler(userService)
+	userHandler := handler.NewGRPCHandler(userService)
 
 	// Register handler
 	pb.RegisterUserServiceServer(grpcServer, userHandler)

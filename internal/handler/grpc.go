@@ -1,11 +1,11 @@
-package handlers
+package handler
 
 import (
 	"context"
 	"strings"
 
 	"github.com/fredrikaverpil/go-microservice/internal/domain"
-	"github.com/fredrikaverpil/go-microservice/internal/ports"
+	"github.com/fredrikaverpil/go-microservice/internal/port"
 	pb "github.com/fredrikaverpil/go-microservice/internal/proto/gen/go/gomicroservice/v1"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -15,10 +15,10 @@ import (
 
 type GRPCHandler struct {
 	pb.UnimplementedUserServiceServer
-	userService ports.UserService
+	userService port.UserService
 }
 
-func NewGRPCHandler(userService ports.UserService) *GRPCHandler {
+func NewGRPCHandler(userService port.UserService) *GRPCHandler {
 	return &GRPCHandler{
 		userService: userService,
 	}

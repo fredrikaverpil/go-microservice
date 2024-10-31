@@ -5,7 +5,7 @@ import (
 	"log/slog"
 
 	"github.com/fredrikaverpil/go-microservice/internal/domain"
-	"github.com/fredrikaverpil/go-microservice/internal/ports"
+	"github.com/fredrikaverpil/go-microservice/internal/port"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -14,7 +14,7 @@ type UserService struct {
 	logger *slog.Logger
 }
 
-func NewUserService(logger *slog.Logger) ports.UserService {
+func NewUserService(logger *slog.Logger) port.UserService {
 	return &UserService{
 		logger: logger,
 	}
