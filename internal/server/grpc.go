@@ -6,6 +6,7 @@ import (
 
 	"github.com/fredrikaverpil/go-microservice/internal/config"
 	"github.com/fredrikaverpil/go-microservice/internal/handlers"
+	"github.com/fredrikaverpil/go-microservice/internal/middleware"
 	pb "github.com/fredrikaverpil/go-microservice/internal/proto/gen/go/gomicroservice/v1"
 	"github.com/fredrikaverpil/go-microservice/internal/service"
 	"google.golang.org/grpc"
@@ -19,7 +20,10 @@ type GRPCServer struct {
 }
 
 func NewGRPCServer(port string, logger *slog.Logger) *GRPCServer {
-	grpcServer := grpc.NewServer()
+	// Create server with logging interceptor
+	grpcServer := grpc.NewServer(
+		grpc.UnaryInterceptor(middleware.UnaryServerLoggingInterceptor(logger)),
+	)
 
 	// Create service and handler with logger
 	userService := service.NewUserService(logger)

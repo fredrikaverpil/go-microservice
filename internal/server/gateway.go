@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/fredrikaverpil/go-microservice/internal/middleware"
 	gomicroservicev1 "github.com/fredrikaverpil/go-microservice/internal/proto/gen/go/gomicroservice/v1"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"
@@ -16,7 +17,7 @@ type GatewayServer struct {
 	logger *slog.Logger
 }
 
-func NewGatewayServer(port string, grpcPort string, logger *slog.Logger) (*GatewayServer, error) {
+func NewGatewayServer(port, grpcPort string, logger *slog.Logger) (*GatewayServer, error) {
 	ctx := context.Background()
 	mux := runtime.NewServeMux()
 
@@ -27,9 +28,12 @@ func NewGatewayServer(port string, grpcPort string, logger *slog.Logger) (*Gatew
 		return nil, err
 	}
 
+	// Wrap mux with logging middleware
+	loggingHandler := middleware.HTTPLoggingMiddleware(logger, mux)
+
 	server := &http.Server{
 		Addr:    ":" + port,
-		Handler: mux,
+		Handler: loggingHandler,
 	}
 
 	return &GatewayServer{
