@@ -27,7 +27,7 @@ func NewGRPCServer(
 ) (*GRPCServer, error) {
 	// Create server with interceptors
 	grpcServer := grpc.NewServer(
-		grpc.ChainUnaryInterceptor(middleware.UnaryServerInterceptors(logger)...),
+		grpc.ChainUnaryInterceptor(middleware.GRPCUnaryServerInterceptors(logger)...),
 	)
 
 	// Create service and handler
