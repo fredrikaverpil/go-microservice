@@ -1,12 +1,19 @@
 package main
 
 import (
+	"context"
 	"log/slog"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/fredrikaverpil/go-microservice/internal/server"
+)
+
+const (
+	grpcPort = "50051"
+	httpPort = "8080"
 )
 
 func main() {
@@ -15,12 +22,28 @@ func main() {
 		Level: slog.LevelInfo,
 	}))
 
-	grpcServer := server.NewGRPCServer("50051", logger)
+	// Initialize gRPC server
+	grpcServer := server.NewGRPCServer(grpcPort, logger)
 
-	// Start server in a goroutine
+	// Initialize HTTP gateway server
+	gatewayServer, err := server.NewGatewayServer(httpPort, grpcPort, logger)
+	if err != nil {
+		logger.Error("Failed to create gateway server", "error", err)
+		os.Exit(1)
+	}
+
+	// Start gRPC server
 	go func() {
 		if err := grpcServer.Start(); err != nil {
 			logger.Error("Failed to start gRPC server", "error", err)
+			os.Exit(1)
+		}
+	}()
+
+	// Start HTTP gateway server
+	go func() {
+		if err := gatewayServer.Start(); err != nil {
+			logger.Error("Failed to start gateway server", "error", err)
 			os.Exit(1)
 		}
 	}()
@@ -30,6 +53,12 @@ func main() {
 	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
 	<-quit
 
-	// Gracefully stop the server
+	// Gracefully stop both servers
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := gatewayServer.Stop(ctx); err != nil {
+		logger.Error("Failed to stop gateway server", "error", err)
+	}
 	grpcServer.Stop()
 }

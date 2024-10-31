@@ -4,20 +4,30 @@ import (
 	"log/slog"
 	"net"
 
+	pb "github.com/fredrikaverpil/go-microservice/internal/proto/gen/go/gomicroservice/v1"
+	"github.com/fredrikaverpil/go-microservice/internal/service"
 	"google.golang.org/grpc"
 )
 
 type GRPCServer struct {
-	server *grpc.Server
-	port   string
-	logger *slog.Logger
+	server      *grpc.Server
+	port        string
+	logger      *slog.Logger
+	userService *service.UserService
 }
 
 func NewGRPCServer(port string, logger *slog.Logger) *GRPCServer {
+	grpcServer := grpc.NewServer()
+	userService := service.NewUserService()
+
+	// Register the user service
+	pb.RegisterUserServiceServer(grpcServer, userService)
+
 	return &GRPCServer{
-		server: grpc.NewServer(),
-		port:   port,
-		logger: logger,
+		server:      grpcServer,
+		port:        port,
+		logger:      logger,
+		userService: userService,
 	}
 }
 
