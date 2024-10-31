@@ -31,8 +31,8 @@ func NewGatewayServer(
 		return nil, err
 	}
 
-	// Wrap mux with middleware chain (logging only)
-	handler := middleware.Chain(middleware.HTTPServerMiddlewares(logger)...)(mux)
+	// Wrap mux with middlewares
+	handler := middleware.WithHTTPMiddlewares(mux, middleware.HTTPServerMiddlewares(logger)...)
 
 	server := &http.Server{
 		Addr:    ":" + port,

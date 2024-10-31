@@ -13,6 +13,10 @@ import (
 func GRPCUnaryServerInterceptors(logger *slog.Logger) []grpc.UnaryServerInterceptor {
 	return []grpc.UnaryServerInterceptor{
 		unaryLoggingInterceptor(logger),
+		// Easy to add new middlewares here, for example:
+		// rateLimitMiddleware(100),
+		// metricMiddleware(),
+		// authMiddleware(),
 	}
 }
 
