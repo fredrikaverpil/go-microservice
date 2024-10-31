@@ -48,3 +48,7 @@ api-lint:
 buf-generate:
 	cd proto && buf lint && buf generate
 
+.PHONY: run-server
+run-server:
+	go run cmd/server/main.go
+
