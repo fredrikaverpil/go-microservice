@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"log/slog"
 	"net"
 
@@ -16,9 +17,11 @@ import (
 )
 
 type GRPCServer struct {
-	server *grpc.Server
-	port   string
-	logger *slog.Logger
+	server   *grpc.Server
+	port     string
+	logger   *slog.Logger
+	listener net.Listener
+	ready    bool
 }
 
 func NewGRPCServer(
@@ -45,30 +48,51 @@ func NewGRPCServer(
 		logger.Info("gRPC reflection enabled")
 	}
 
+	// Create listener during initialization
+	lis, err := net.Listen("tcp", ":"+port)
+	if err != nil {
+		return nil, err
+	}
+
 	return &GRPCServer{
-		server: grpcServer,
-		port:   port,
-		logger: logger,
+		server:   grpcServer,
+		port:     port,
+		logger:   logger,
+		listener: lis,
+		ready:    false,
 	}, nil
 }
 
 func (s *GRPCServer) Start() error {
-	lis, err := net.Listen("tcp", ":"+s.port)
-	if err != nil {
-		return err
-	}
-
 	s.logger.Info("gRPC server listening", "port", s.port)
-	if err := s.server.Serve(lis); err != nil {
+	s.ready = true
+	if err := s.server.Serve(s.listener); err != nil {
+		s.ready = false
 		return err
 	}
-
 	return nil
 }
 
-func (s *GRPCServer) Stop() {
-	s.server.GracefulStop()
-	s.logger.Info("gRPC server stopped")
+func (s *GRPCServer) Stop(ctx context.Context) error {
+	stopped := make(chan struct{})
+	go func() {
+		s.ready = false
+		s.server.GracefulStop()
+		close(stopped)
+	}()
+
+	select {
+	case <-ctx.Done():
+		s.server.Stop()
+		return ctx.Err()
+	case <-stopped:
+		s.logger.Info("gRPC server stopped gracefully")
+		return nil
+	}
+}
+
+func (s *GRPCServer) IsReady() bool {
+	return s.ready
 }
 
 func (s *GRPCServer) GetServer() *grpc.Server {

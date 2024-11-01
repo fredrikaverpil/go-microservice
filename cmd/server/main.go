@@ -13,8 +13,10 @@ import (
 )
 
 const (
-	grpcPort = "50051"
-	httpPort = "8080"
+	grpcPort        = "50051"
+	httpPort        = "8080"
+	shutdownTimeout = 30 * time.Second
+	shutdownGrace   = 2 * time.Second
 )
 
 func main() {
@@ -62,15 +64,39 @@ func main() {
 
 	// Wait for interrupt signal
 	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
-	<-quit
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	sig := <-quit
+	logger.Info("Initiating graceful shutdown", "signal", sig)
 
-	// Gracefully stop both servers
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	// Create root context for shutdown
+	ctx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
 	defer cancel()
 
+	// First stop accepting new requests at gateway
 	if err := gatewayServer.Stop(ctx); err != nil {
 		logger.Error("Failed to stop gateway server", "error", err)
+		os.Exit(1)
 	}
-	grpcServer.Stop()
+
+	// Give in-flight requests time to reach gRPC server
+	select {
+	case <-time.After(shutdownGrace):
+	case <-ctx.Done():
+		logger.Error("Shutdown grace period exceeded")
+	}
+
+	// Now stop the gRPC server
+	if err := grpcServer.Stop(ctx); err != nil {
+		logger.Error("Failed to stop gRPC server", "error", err)
+		os.Exit(1)
+	}
+
+	// Wait for context to ensure we don't exceed total shutdown timeout
+	select {
+	case <-ctx.Done():
+		logger.Error("Shutdown timeout exceeded")
+		os.Exit(1)
+	default:
+		logger.Info("Graceful shutdown completed")
+	}
 }
