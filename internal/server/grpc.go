@@ -9,6 +9,7 @@ import (
 	"github.com/fredrikaverpil/go-microservice/internal/handler"
 	"github.com/fredrikaverpil/go-microservice/internal/middleware"
 	pb "github.com/fredrikaverpil/go-microservice/internal/proto/gen/go/gomicroservice/v1"
+	"github.com/fredrikaverpil/go-microservice/internal/repo"
 	"github.com/fredrikaverpil/go-microservice/internal/service"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -30,8 +31,9 @@ func NewGRPCServer(
 		grpc.ChainUnaryInterceptor(middleware.GRPCUnaryServerInterceptors(logger)...),
 	)
 
-	// Create service and handler
-	userService := service.NewUserService(logger)
+	// Create repository and service
+	userRepo := repo.NewMemoryRepository(logger)
+	userService := service.NewUserService(logger, userRepo)
 	userHandler := handler.NewGRPCHandler(userService, validator)
 
 	// Register handler
