@@ -81,7 +81,10 @@ message User {
   ];
 
   // The email address of the user.
-  string email = 3 [(google.api.field_behavior) = REQUIRED];
+  string email = 3 [
+    (google.api.field_behavior) = REQUIRED,
+    (buf.validate.field).string.email = true
+  ];
 
   // The creation time of the user.
   google.protobuf.Timestamp create_time = 4 [(google.api.field_behavior) = OUTPUT_ONLY];
