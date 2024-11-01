@@ -17,8 +17,12 @@ make run-server
 # List all available services
 grpcurl -plaintext localhost:50051 list
 
-# Create a user
+# Create a user with server-assigned ID
 grpcurl -plaintext -d '{"user":{"display_name":"John Doe","email":"john@example.com"}}' \
+  localhost:50051 gomicroservice.v1.UserService/CreateUser
+
+# Create a user with client-assigned ID
+grpcurl -plaintext -d '{"user":{"name":"users/user123","display_name":"John Doe","email":"john@example.com"}}' \
   localhost:50051 gomicroservice.v1.UserService/CreateUser
 
 # Get a user
@@ -41,9 +45,14 @@ grpcurl -plaintext -d '{"name":"users/user123"}' \
 #### REST APIs with curl
 
 ```bash
-# Create a user
+# Create a user with server-assigned ID
 curl -X POST -H "Content-Type: application/json" \
   -d '{"user":{"display_name":"John Doe","email":"john@example.com"}}' \
+  http://localhost:8080/v1/users
+
+# Create a user with client-assigned ID
+curl -X POST -H "Content-Type: application/json" \
+  -d '{"user":{"name":"users/user123","display_name":"John Doe","email":"john@example.com"}}' \
   http://localhost:8080/v1/users
 
 # Get a user

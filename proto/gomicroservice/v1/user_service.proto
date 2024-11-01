@@ -72,13 +72,13 @@ message User {
 
   // The resource name of the user.
   // Format: users/{user_id}
-  string name = 1 [
-    (google.api.field_behavior) = IDENTIFIER,
-    (buf.validate.field).string.min_len = 1
-  ];
+  string name = 1 [(google.api.field_behavior) = IDENTIFIER];
 
   // The display name of the user.
-  string display_name = 2 [(google.api.field_behavior) = REQUIRED];
+  string display_name = 2 [
+    (google.api.field_behavior) = REQUIRED,
+    (buf.validate.field).string.min_len = 2
+  ];
 
   // The email address of the user.
   string email = 3 [(google.api.field_behavior) = REQUIRED];
