@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log/slog"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -46,6 +47,23 @@ func main() {
 		os.Exit(1)
 	}
 
+	// Add health check endpoint
+	healthServer := &http.Server{
+		Addr: ":8081",
+		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if !gatewayServer.HealthCheck() || !grpcServer.HealthCheck() {
+				w.WriteHeader(http.StatusServiceUnavailable)
+				return
+			}
+			w.WriteHeader(http.StatusOK)
+		}),
+	}
+	go func() {
+		if err := healthServer.ListenAndServe(); err != http.ErrServerClosed {
+			logger.Error("Health check server failed", "error", err)
+		}
+	}()
+
 	// Start gRPC server
 	go func() {
 		if err := grpcServer.Start(); err != nil {
@@ -71,6 +89,11 @@ func main() {
 	// Create root context for shutdown
 	ctx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
 	defer cancel()
+
+	// Stop health check server first
+	if err := healthServer.Shutdown(ctx); err != nil {
+		logger.Error("Failed to stop health check server", "error", err)
+	}
 
 	// First stop accepting new requests at gateway
 	if err := gatewayServer.Stop(ctx); err != nil {

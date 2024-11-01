@@ -16,12 +16,22 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
+type ServerState int
+
+const (
+	StateStarting ServerState = iota
+	StateRunning
+	StateShuttingDown
+	StateStopped
+)
+
 type GRPCServer struct {
 	server   *grpc.Server
 	port     string
 	logger   *slog.Logger
 	listener net.Listener
 	ready    bool
+	state    ServerState
 }
 
 func NewGRPCServer(
@@ -60,20 +70,25 @@ func NewGRPCServer(
 		logger:   logger,
 		listener: lis,
 		ready:    false,
+		state:    StateStarting,
 	}, nil
 }
 
 func (s *GRPCServer) Start() error {
 	s.logger.Info("gRPC server listening", "port", s.port)
 	s.ready = true
+	s.state = StateRunning
 	if err := s.server.Serve(s.listener); err != nil {
 		s.ready = false
+		s.state = StateStopped
 		return err
 	}
 	return nil
 }
 
 func (s *GRPCServer) Stop(ctx context.Context) error {
+	s.state = StateShuttingDown
+	s.ready = false
 	stopped := make(chan struct{})
 	go func() {
 		s.ready = false
@@ -84,9 +99,11 @@ func (s *GRPCServer) Stop(ctx context.Context) error {
 	select {
 	case <-ctx.Done():
 		s.server.Stop()
+		s.state = StateStopped
 		return ctx.Err()
 	case <-stopped:
 		s.logger.Info("gRPC server stopped gracefully")
+		s.state = StateStopped
 		return nil
 	}
 }
@@ -97,4 +114,12 @@ func (s *GRPCServer) IsReady() bool {
 
 func (s *GRPCServer) GetServer() *grpc.Server {
 	return s.server
+}
+
+func (s *GRPCServer) HealthCheck() bool {
+	return s.state == StateRunning && s.ready
+}
+
+func (s *GRPCServer) State() ServerState {
+	return s.state
 }

@@ -15,6 +15,8 @@ import (
 type GatewayServer struct {
 	server *http.Server
 	logger *slog.Logger
+	state  ServerState
+	ready  bool
 }
 
 func NewGatewayServer(
@@ -45,18 +47,40 @@ func NewGatewayServer(
 	return &GatewayServer{
 		server: server,
 		logger: logger,
+		state:  StateStarting,
+		ready:  false,
 	}, nil
 }
 
 func (s *GatewayServer) Start() error {
 	s.logger.Info("HTTP gateway server listening", "port", s.server.Addr)
+	s.ready = true
+	s.state = StateRunning
 	if err := s.server.ListenAndServe(); err != http.ErrServerClosed {
+		s.ready = false
+		s.state = StateStopped
 		return err
 	}
 	return nil
 }
 
 func (s *GatewayServer) Stop(ctx context.Context) error {
+	s.state = StateShuttingDown
+	s.ready = false
 	s.logger.Info("HTTP gateway server stopping")
-	return s.server.Shutdown(ctx)
+	err := s.server.Shutdown(ctx)
+	s.state = StateStopped
+	return err
+}
+
+func (s *GatewayServer) IsReady() bool {
+	return s.ready
+}
+
+func (s *GatewayServer) HealthCheck() bool {
+	return s.state == StateRunning && s.ready
+}
+
+func (s *GatewayServer) State() ServerState {
+	return s.state
 }
