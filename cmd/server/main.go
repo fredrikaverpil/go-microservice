@@ -16,11 +16,53 @@ import (
 )
 
 const (
-	grpcPort        = "50051"
-	httpPort        = "8080"
-	shutdownTimeout = 30 * time.Second
-	shutdownGrace   = 2 * time.Second
+	grpcPort           = "50051"
+	httpPort           = "8080"
+	shutdownTimeout    = 30 * time.Second
+	shutdownGrace      = 2 * time.Second
+	maxShutdownRetries = 3
+	initialBackoff     = time.Second
 )
+
+// attemptGracefulShutdown attempts to stop a server with exponential backoff
+func attemptGracefulShutdown(
+	ctx context.Context,
+	srv server.Server,
+	name string,
+	logger *slog.Logger,
+) error {
+	backoff := initialBackoff
+	var lastErr error
+
+	for retries := maxShutdownRetries; retries > 0; retries-- {
+		shutdownCtx, cancel := context.WithTimeout(ctx, backoff)
+		err := srv.Stop(shutdownCtx)
+		cancel()
+
+		if err == nil {
+			logger.Info("Server stopped successfully", "server", name)
+			return nil
+		}
+
+		lastErr = err
+		logger.Warn("Shutdown attempt failed",
+			"server", name,
+			"error", err,
+			"retriesLeft", retries-1,
+			"nextBackoff", backoff*2)
+
+		// Check if we have time for another attempt
+		if ctx.Err() != nil {
+			return fmt.Errorf("shutdown canceled during backoff: %w", ctx.Err())
+		}
+
+		time.Sleep(backoff)
+		backoff *= 2
+	}
+
+	return fmt.Errorf("failed to stop %s server after %d attempts: %w",
+		name, maxShutdownRetries, lastErr)
+}
 
 func main() {
 	// Initialize structured logger
@@ -130,10 +172,10 @@ func main() {
 		}
 	}()
 
-	// Stop gateway server
+	// Stop gateway server with backoff
 	go func() {
 		defer shutdownWg.Done()
-		if err := gatewayServer.Stop(ctx); err != nil {
+		if err := attemptGracefulShutdown(ctx, gatewayServer, "gateway", logger); err != nil {
 			logger.Error("Failed to stop gateway server", "error", err)
 		}
 	}()
@@ -141,10 +183,10 @@ func main() {
 	// Give in-flight requests time to reach gRPC server
 	time.Sleep(shutdownGrace)
 
-	// Stop gRPC server
+	// Stop gRPC server with backoff
 	go func() {
 		defer shutdownWg.Done()
-		if err := grpcServer.Stop(ctx); err != nil {
+		if err := attemptGracefulShutdown(ctx, grpcServer, "gRPC", logger); err != nil {
 			logger.Error("Failed to stop gRPC server", "error", err)
 		}
 	}()
