@@ -2,10 +2,12 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
 	"time"
 
@@ -47,6 +49,14 @@ func main() {
 		os.Exit(1)
 	}
 
+	// Create error channel for startup errors
+	startupErrors := make(chan error, 3) // 3 for gRPC, gateway, and health check
+	defer close(startupErrors)
+
+	// Create WaitGroup for all servers
+	var wg sync.WaitGroup
+	wg.Add(3) // gRPC, gateway, and health check servers
+
 	// Add health check endpoint
 	healthServer := &http.Server{
 		Addr: ":8081",
@@ -59,67 +69,101 @@ func main() {
 		}),
 	}
 	go func() {
+		defer wg.Done()
 		if err := healthServer.ListenAndServe(); err != http.ErrServerClosed {
-			logger.Error("Health check server failed", "error", err)
+			startupErrors <- fmt.Errorf("health check server error: %w", err)
 		}
 	}()
 
 	// Start gRPC server
 	go func() {
+		defer wg.Done()
 		if err := grpcServer.Start(); err != nil {
-			logger.Error("Failed to start gRPC server", "error", err)
-			os.Exit(1)
+			startupErrors <- fmt.Errorf("gRPC server error: %w", err)
 		}
 	}()
 
 	// Start HTTP gateway server
 	go func() {
+		defer wg.Done()
 		if err := gatewayServer.Start(); err != nil {
-			logger.Error("Failed to start gateway server", "error", err)
-			os.Exit(1)
+			startupErrors <- fmt.Errorf("gateway server error: %w", err)
 		}
 	}()
 
-	// Wait for interrupt signal
+	// Wait for interrupt or startup error
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-	sig := <-quit
-	logger.Info("Initiating graceful shutdown", "signal", sig)
+
+	// Use separate goroutine to check for startup errors
+	errChan := make(chan error, 1)
+	go func() {
+		select {
+		case err := <-startupErrors:
+			errChan <- err
+		case <-quit:
+			errChan <- nil
+		}
+	}()
+
+	// Wait for shutdown signal or error
+	if err := <-errChan; err != nil {
+		logger.Error("Server startup failed", "error", err)
+		os.Exit(1)
+	}
+
+	logger.Info("Initiating graceful shutdown")
 
 	// Create root context for shutdown
 	ctx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
 	defer cancel()
 
-	// Stop health check server first
-	if err := healthServer.Shutdown(ctx); err != nil {
-		logger.Error("Failed to stop health check server", "error", err)
-	}
+	// Create WaitGroup for shutdown operations
+	var shutdownWg sync.WaitGroup
+	shutdownWg.Add(3)
 
-	// First stop accepting new requests at gateway
-	if err := gatewayServer.Stop(ctx); err != nil {
-		logger.Error("Failed to stop gateway server", "error", err)
-		os.Exit(1)
-	}
+	// Stop health check server first
+	go func() {
+		defer shutdownWg.Done()
+		if err := healthServer.Shutdown(ctx); err != nil {
+			logger.Error("Failed to stop health check server", "error", err)
+		}
+	}()
+
+	// Stop gateway server
+	go func() {
+		defer shutdownWg.Done()
+		if err := gatewayServer.Stop(ctx); err != nil {
+			logger.Error("Failed to stop gateway server", "error", err)
+		}
+	}()
 
 	// Give in-flight requests time to reach gRPC server
-	select {
-	case <-time.After(shutdownGrace):
-	case <-ctx.Done():
-		logger.Error("Shutdown grace period exceeded")
-	}
+	time.Sleep(shutdownGrace)
 
-	// Now stop the gRPC server
-	if err := grpcServer.Stop(ctx); err != nil {
-		logger.Error("Failed to stop gRPC server", "error", err)
-		os.Exit(1)
-	}
+	// Stop gRPC server
+	go func() {
+		defer shutdownWg.Done()
+		if err := grpcServer.Stop(ctx); err != nil {
+			logger.Error("Failed to stop gRPC server", "error", err)
+		}
+	}()
 
-	// Wait for context to ensure we don't exceed total shutdown timeout
+	// Wait for all shutdown operations to complete or timeout
+	shutdownComplete := make(chan struct{})
+	go func() {
+		shutdownWg.Wait()
+		close(shutdownComplete)
+	}()
+
 	select {
 	case <-ctx.Done():
 		logger.Error("Shutdown timeout exceeded")
 		os.Exit(1)
-	default:
+	case <-shutdownComplete:
 		logger.Info("Graceful shutdown completed")
 	}
+
+	// Wait for all server goroutines to exit
+	wg.Wait()
 }
