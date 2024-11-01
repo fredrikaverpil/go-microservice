@@ -16,15 +16,6 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
-type ServerState int
-
-const (
-	StateStarting ServerState = iota
-	StateRunning
-	StateShuttingDown
-	StateStopped
-)
-
 type GRPCServer struct {
 	server   *grpc.Server
 	port     string
