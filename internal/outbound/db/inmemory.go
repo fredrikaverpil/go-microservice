@@ -1,12 +1,12 @@
-package repo
+package db
 
 import (
 	"context"
 	"log/slog"
 	"sync"
 
-	"github.com/fredrikaverpil/go-microservice/internal/domain"
-	"github.com/fredrikaverpil/go-microservice/internal/port"
+	"github.com/fredrikaverpil/go-microservice/internal/core/domain"
+	"github.com/fredrikaverpil/go-microservice/internal/core/port"
 )
 
 type MemoryRepository struct {

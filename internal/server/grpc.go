@@ -6,11 +6,11 @@ import (
 
 	"github.com/bufbuild/protovalidate-go"
 	"github.com/fredrikaverpil/go-microservice/internal/config"
-	"github.com/fredrikaverpil/go-microservice/internal/handler"
+	"github.com/fredrikaverpil/go-microservice/internal/core/service"
+	pb "github.com/fredrikaverpil/go-microservice/internal/inbound/handler/grpc/gen/go/gomicroservice/v1"
+	"github.com/fredrikaverpil/go-microservice/internal/inbound/handler/grpc/gomicroservice"
 	"github.com/fredrikaverpil/go-microservice/internal/middleware"
-	pb "github.com/fredrikaverpil/go-microservice/internal/proto/gen/go/gomicroservice/v1"
-	"github.com/fredrikaverpil/go-microservice/internal/repo"
-	"github.com/fredrikaverpil/go-microservice/internal/service"
+	"github.com/fredrikaverpil/go-microservice/internal/outbound/db"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
@@ -32,9 +32,9 @@ func NewGRPCServer(
 	)
 
 	// Create repository and service
-	userRepo := repo.NewMemoryRepository(logger)
+	userRepo := db.NewMemoryRepository(logger)
 	userService := service.NewUserService(logger, userRepo)
-	userHandler := handler.NewGRPCHandler(userService, validator)
+	userHandler := gomicroservice.NewGRPCHandler(userService, validator)
 
 	// Register handler
 	pb.RegisterUserServiceServer(grpcServer, userHandler)

@@ -1,10 +1,10 @@
-package handler
+package gomicroservice
 
 import (
 	"errors"
 
-	"github.com/fredrikaverpil/go-microservice/internal/domain"
-	pb "github.com/fredrikaverpil/go-microservice/internal/proto/gen/go/gomicroservice/v1"
+	"github.com/fredrikaverpil/go-microservice/internal/core/domain"
+	pb "github.com/fredrikaverpil/go-microservice/internal/inbound/handler/grpc/gen/go/gomicroservice/v1"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"

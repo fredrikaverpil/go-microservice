@@ -3,7 +3,7 @@ package port
 import (
 	"context"
 
-	"github.com/fredrikaverpil/go-microservice/internal/domain"
+	"github.com/fredrikaverpil/go-microservice/internal/core/domain"
 )
 
 type UserService interface {

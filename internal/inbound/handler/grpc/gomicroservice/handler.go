@@ -1,13 +1,13 @@
-package handler
+package gomicroservice
 
 import (
 	"context"
 	"strings"
 
 	"github.com/bufbuild/protovalidate-go"
-	"github.com/fredrikaverpil/go-microservice/internal/domain"
-	"github.com/fredrikaverpil/go-microservice/internal/port"
-	pb "github.com/fredrikaverpil/go-microservice/internal/proto/gen/go/gomicroservice/v1"
+	"github.com/fredrikaverpil/go-microservice/internal/core/domain"
+	"github.com/fredrikaverpil/go-microservice/internal/core/port"
+	pb "github.com/fredrikaverpil/go-microservice/internal/inbound/handler/grpc/gen/go/gomicroservice/v1"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"

@@ -4,8 +4,8 @@ import (
 	"context"
 	"log/slog"
 
-	"github.com/fredrikaverpil/go-microservice/internal/domain"
-	"github.com/fredrikaverpil/go-microservice/internal/port"
+	"github.com/fredrikaverpil/go-microservice/internal/core/domain"
+	"github.com/fredrikaverpil/go-microservice/internal/core/port"
 )
 
 type UserService struct {
