@@ -16,53 +16,11 @@ import (
 )
 
 const (
-	grpcPort           = "50051"
-	httpPort           = "8080"
-	shutdownTimeout    = 30 * time.Second
-	shutdownGrace      = 2 * time.Second
-	maxShutdownRetries = 3
-	initialBackoff     = time.Second
+	grpcPort        = "50051"
+	httpPort        = "8080"
+	shutdownTimeout = 30 * time.Second
+	shutdownGrace   = 2 * time.Second
 )
-
-// attemptGracefulShutdown attempts to stop a server with exponential backoff
-func attemptGracefulShutdown(
-	ctx context.Context,
-	srv server.Server,
-	name string,
-	logger *slog.Logger,
-) error {
-	backoff := initialBackoff
-	var lastErr error
-
-	for retries := maxShutdownRetries; retries > 0; retries-- {
-		shutdownCtx, cancel := context.WithTimeout(ctx, backoff)
-		err := srv.Stop(shutdownCtx)
-		cancel()
-
-		if err == nil {
-			logger.Info("Server stopped successfully", "server", name)
-			return nil
-		}
-
-		lastErr = err
-		logger.Warn("Shutdown attempt failed",
-			"server", name,
-			"error", err,
-			"retriesLeft", retries-1,
-			"nextBackoff", backoff*2)
-
-		// Check if we have time for another attempt
-		if ctx.Err() != nil {
-			return fmt.Errorf("shutdown canceled during backoff: %w", ctx.Err())
-		}
-
-		time.Sleep(backoff)
-		backoff *= 2
-	}
-
-	return fmt.Errorf("failed to stop %s server after %d attempts: %w",
-		name, maxShutdownRetries, lastErr)
-}
 
 func main() {
 	// Initialize structured logger
@@ -137,75 +95,39 @@ func main() {
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 
-	// Use separate goroutine to check for startup errors
-	errChan := make(chan error, 1)
-	go func() {
-		select {
-		case err := <-startupErrors:
-			errChan <- err
-		case <-quit:
-			errChan <- nil
-		}
-	}()
-
-	// Wait for shutdown signal or error
-	if err := <-errChan; err != nil {
+	// Wait for shutdown signal or startup error
+	select {
+	case err := <-startupErrors:
 		logger.Error("Server startup failed", "error", err)
 		os.Exit(1)
+	case <-quit:
+		logger.Info("Initiating graceful shutdown")
 	}
 
-	logger.Info("Initiating graceful shutdown")
-
-	// Create root context for shutdown
+	// Create shutdown context
 	ctx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
 	defer cancel()
 
-	// Create WaitGroup for shutdown operations
-	var shutdownWg sync.WaitGroup
-	shutdownWg.Add(3)
+	// Sequential shutdown in specific order
+	logger.Info("Stopping health check server")
+	if err := healthServer.Shutdown(ctx); err != nil {
+		logger.Error("Health check server shutdown failed", "error", err)
+	}
 
-	// Stop health check server first
-	go func() {
-		defer shutdownWg.Done()
-		if err := healthServer.Shutdown(ctx); err != nil {
-			logger.Error("Failed to stop health check server", "error", err)
-		}
-	}()
+	logger.Info("Stopping gateway server")
+	if err := gatewayServer.Stop(ctx); err != nil {
+		logger.Error("Gateway server shutdown failed", "error", err)
+	}
 
-	// Stop gateway server with backoff
-	go func() {
-		defer shutdownWg.Done()
-		if err := attemptGracefulShutdown(ctx, gatewayServer, "gateway", logger); err != nil {
-			logger.Error("Failed to stop gateway server", "error", err)
-		}
-	}()
-
-	// Give in-flight requests time to reach gRPC server
+	// Grace period for in-flight requests to reach gRPC
 	time.Sleep(shutdownGrace)
 
-	// Stop gRPC server with backoff
-	go func() {
-		defer shutdownWg.Done()
-		if err := attemptGracefulShutdown(ctx, grpcServer, "gRPC", logger); err != nil {
-			logger.Error("Failed to stop gRPC server", "error", err)
-		}
-	}()
-
-	// Wait for all shutdown operations to complete or timeout
-	shutdownComplete := make(chan struct{})
-	go func() {
-		shutdownWg.Wait()
-		close(shutdownComplete)
-	}()
-
-	select {
-	case <-ctx.Done():
-		logger.Error("Shutdown timeout exceeded")
-		os.Exit(1)
-	case <-shutdownComplete:
-		logger.Info("Graceful shutdown completed")
+	logger.Info("Stopping gRPC server")
+	if err := grpcServer.Stop(ctx); err != nil {
+		logger.Error("gRPC server shutdown failed", "error", err)
 	}
 
 	// Wait for all server goroutines to exit
 	wg.Wait()
+	logger.Info("Graceful shutdown completed")
 }
