@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
-	"strings"
 	"sync"
 	"time"
 
 	"github.com/fredrikaverpil/go-microservice/internal/core/domain"
 	"github.com/fredrikaverpil/go-microservice/internal/core/port"
+	pb "github.com/fredrikaverpil/go-microservice/internal/inbound/handler/grpc/gen/go/gomicroservice/v1"
 	"github.com/google/uuid"
 )
 
@@ -41,17 +41,18 @@ func (r *MemoryRepository) CreateUser(
 		return nil, domain.NewErrorInvalidInput("email is required", nil)
 	}
 
-	// Extract user_id from name or generate new one
-	var userID string
+	// If name is provided, validate it
 	if user.Name != "" {
-		parts := strings.Split(user.Name, "/")
-		if len(parts) != 2 || parts[0] != "users" {
+		var resourceName pb.UserResourceName
+		if err := resourceName.UnmarshalString(user.Name); err != nil {
 			return nil, domain.NewErrorInvalidInput("invalid name format", nil)
 		}
-		userID = parts[1]
 	} else {
-		userID = uuid.New().String()
-		user.Name = fmt.Sprintf("users/%s", userID)
+		// Generate a new name using the proper format
+		resourceName := pb.UserResourceName{
+			User: uuid.New().String(),
+		}
+		user.Name = resourceName.String()
 	}
 
 	// Check if user already exists
@@ -93,6 +94,7 @@ func (r *MemoryRepository) copyUser(user *domain.User) *domain.User {
 }
 
 func (r *MemoryRepository) GetUser(ctx context.Context, name string) (*domain.User, error) {
+
 	r.mutex.RLock()
 	defer r.mutex.RUnlock()
 

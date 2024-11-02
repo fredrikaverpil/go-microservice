@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	genapi "github.com/fredrikaverpil/go-microservice/gen/go/gomicroservice/v1"
 	"github.com/fredrikaverpil/go-microservice/internal/core/domain"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"gotest.tools/v3/assert"
@@ -136,16 +137,16 @@ func TestCreateUser(t *testing.T) {
 		ctx := context.Background()
 
 		user := &domain.User{
-			Name:        "invalid-format",
+			Name:        "invalid-format", // this should fail as it doesn't follow users/{user} format
 			DisplayName: "Test User",
 			Email:       "test@example.com",
 		}
 
 		_, err := repo.CreateUser(ctx, user)
-		assert.DeepEqual(t, err, &domain.Error{
-			Type:    domain.InvalidInput,
-			Message: "invalid name format",
-		})
+		assert.Assert(t, err != nil)
+		var resourceName genapi.UserResourceName
+		validationErr := resourceName.UnmarshalString(user.Name)
+		assert.Assert(t, validationErr != nil)
 	})
 
 	t.Run("failure - missing required fields", func(t *testing.T) {

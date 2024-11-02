@@ -48,3 +48,13 @@ plugins:
     out: gen/openapiv3
     opt:
       - paths=source_relative
+  # aip-go
+  # https://github.com/einride/aip-go
+  - local: protoc-gen-go-aip
+    out: gen/go # public
+    opt:
+      - paths=source_relative
+  - local: protoc-gen-go-aip
+    out: ../internal/inbound/handler/grpc/gen/go # internal
+    opt:
+      - paths=source_relative
