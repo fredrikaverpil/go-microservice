@@ -9,7 +9,7 @@ import (
 
 	"github.com/fredrikaverpil/go-microservice/internal/core/domain"
 	"github.com/fredrikaverpil/go-microservice/internal/core/port"
-	pb "github.com/fredrikaverpil/go-microservice/internal/inbound/handler/grpc/gen/go/gomicroservice/v1"
+	gomicroservicev1 "github.com/fredrikaverpil/go-microservice/internal/inbound/handler/grpc/gen/go/gomicroservice/v1"
 	"github.com/google/uuid"
 )
 
@@ -43,13 +43,13 @@ func (r *MemoryRepository) CreateUser(
 
 	// If name is provided, validate it
 	if user.Name != "" {
-		var resourceName pb.UserResourceName
+		var resourceName gomicroservicev1.UserResourceName
 		if err := resourceName.UnmarshalString(user.Name); err != nil {
 			return nil, domain.NewErrorInvalidInput("invalid name format", nil)
 		}
 	} else {
 		// Generate a new name using the proper format
-		resourceName := pb.UserResourceName{
+		resourceName := gomicroservicev1.UserResourceName{
 			User: uuid.New().String(),
 		}
 		user.Name = resourceName.String()
@@ -94,7 +94,6 @@ func (r *MemoryRepository) copyUser(user *domain.User) *domain.User {
 }
 
 func (r *MemoryRepository) GetUser(ctx context.Context, name string) (*domain.User, error) {
-
 	r.mutex.RLock()
 	defer r.mutex.RUnlock()
 

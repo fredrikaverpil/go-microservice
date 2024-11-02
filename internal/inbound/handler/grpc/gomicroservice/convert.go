@@ -4,15 +4,15 @@ import (
 	"errors"
 
 	"github.com/fredrikaverpil/go-microservice/internal/core/domain"
-	pb "github.com/fredrikaverpil/go-microservice/internal/inbound/handler/grpc/gen/go/gomicroservice/v1"
+	gomicroservicev1 "github.com/fredrikaverpil/go-microservice/internal/inbound/handler/grpc/gen/go/gomicroservice/v1"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // Domain to Proto conversions
-func toProtoUser(user *domain.User) *pb.User {
-	return &pb.User{
+func toProtoUser(user *domain.User) *gomicroservicev1.User {
+	return &gomicroservicev1.User{
 		Name:        user.Name,
 		DisplayName: user.DisplayName,
 		Email:       user.Email,
@@ -22,7 +22,7 @@ func toProtoUser(user *domain.User) *pb.User {
 }
 
 // Proto to Domain conversions
-func toDomainUser(pbUser *pb.User) *domain.User {
+func toDomainUser(pbUser *gomicroservicev1.User) *domain.User {
 	return &domain.User{
 		Name:        pbUser.Name,
 		DisplayName: pbUser.DisplayName,

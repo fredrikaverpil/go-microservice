@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/fredrikaverpil/go-microservice/internal/core/domain"
-	pb "github.com/fredrikaverpil/go-microservice/internal/inbound/handler/grpc/gen/go/gomicroservice/v1"
+	gomicroservicev1 "github.com/fredrikaverpil/go-microservice/internal/inbound/handler/grpc/gen/go/gomicroservice/v1"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"gotest.tools/v3/assert"
 )
@@ -144,7 +144,7 @@ func TestCreateUser(t *testing.T) {
 
 		_, err := repo.CreateUser(ctx, user)
 		assert.Assert(t, err != nil)
-		var resourceName pb.UserResourceName
+		var resourceName gomicroservicev1.UserResourceName
 		validationErr := resourceName.UnmarshalString(user.Name)
 		assert.Assert(t, validationErr != nil)
 	})

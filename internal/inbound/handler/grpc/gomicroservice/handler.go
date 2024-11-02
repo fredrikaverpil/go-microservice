@@ -6,14 +6,14 @@ import (
 	"github.com/bufbuild/protovalidate-go"
 	"github.com/fredrikaverpil/go-microservice/internal/core/domain"
 	"github.com/fredrikaverpil/go-microservice/internal/core/port"
-	pb "github.com/fredrikaverpil/go-microservice/internal/inbound/handler/grpc/gen/go/gomicroservice/v1"
+	gomicroservicev1 "github.com/fredrikaverpil/go-microservice/internal/inbound/handler/grpc/gen/go/gomicroservice/v1"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type GRPCHandler struct {
-	pb.UnimplementedUserServiceServer
+	gomicroservicev1.UnimplementedUserServiceServer
 	userService port.UserService
 	validator   *protovalidate.Validator
 }
@@ -26,14 +26,17 @@ func NewGRPCHandler(userService port.UserService, validator *protovalidate.Valid
 }
 
 // CreateUser implements AIP-133
-func (h *GRPCHandler) CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.User, error) {
+func (h *GRPCHandler) CreateUser(
+	ctx context.Context,
+	req *gomicroservicev1.CreateUserRequest,
+) (*gomicroservicev1.User, error) {
 	// Validate the request
 	// TODO: validate fields: clear, validate required using https://github.com/einride/aip-go
 	if err := h.validator.Validate(req); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 	if req.GetUser().GetName() != "" {
-		var resourceName pb.UserResourceName
+		var resourceName gomicroservicev1.UserResourceName
 		if err := resourceName.UnmarshalString(req.GetUser().GetName()); err != nil {
 			return nil, status.Error(codes.InvalidArgument, "invalid resource name")
 		}
@@ -60,13 +63,16 @@ func (h *GRPCHandler) CreateUser(ctx context.Context, req *pb.CreateUserRequest)
 }
 
 // GetUser implements AIP-131
-func (h *GRPCHandler) GetUser(ctx context.Context, req *pb.GetUserRequest) (*pb.User, error) {
+func (h *GRPCHandler) GetUser(
+	ctx context.Context,
+	req *gomicroservicev1.GetUserRequest,
+) (*gomicroservicev1.User, error) {
 	// Validate the request
 	// TODO: validate fields: clear, validate required using https://github.com/einride/aip-go
 	if err := h.validator.Validate(req); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	var resourceName pb.UserResourceName
+	var resourceName gomicroservicev1.UserResourceName
 	if err := resourceName.UnmarshalString(req.GetName()); err != nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid resource name")
 	}
@@ -84,8 +90,8 @@ func (h *GRPCHandler) GetUser(ctx context.Context, req *pb.GetUserRequest) (*pb.
 // ListUsers implements AIP-132
 func (h *GRPCHandler) ListUsers(
 	ctx context.Context,
-	req *pb.ListUsersRequest,
-) (*pb.ListUsersResponse, error) {
+	req *gomicroservicev1.ListUsersRequest,
+) (*gomicroservicev1.ListUsersResponse, error) {
 	// Validate the request
 	if err := h.validator.Validate(req); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -102,23 +108,26 @@ func (h *GRPCHandler) ListUsers(
 	}
 
 	// Convert and return
-	protoUsers := make([]*pb.User, len(users))
+	protoUsers := make([]*gomicroservicev1.User, len(users))
 	for i, user := range users {
 		protoUsers[i] = toProtoUser(user)
 	}
-	return &pb.ListUsersResponse{
+	return &gomicroservicev1.ListUsersResponse{
 		Users:         protoUsers,
 		NextPageToken: nextPageToken,
 	}, nil
 }
 
 // UpdateUser implements AIP-134
-func (h *GRPCHandler) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest) (*pb.User, error) {
+func (h *GRPCHandler) UpdateUser(
+	ctx context.Context,
+	req *gomicroservicev1.UpdateUserRequest,
+) (*gomicroservicev1.User, error) {
 	// Validate the request (includes required fields and format validation)
 	if err := h.validator.Validate(req); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	var resourceName pb.UserResourceName
+	var resourceName gomicroservicev1.UserResourceName
 	if err := resourceName.UnmarshalString(req.GetUser().GetName()); err != nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid resource name")
 	}
@@ -139,14 +148,14 @@ func (h *GRPCHandler) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest)
 // DeleteUser implements AIP-135
 func (h *GRPCHandler) DeleteUser(
 	ctx context.Context,
-	req *pb.DeleteUserRequest,
+	req *gomicroservicev1.DeleteUserRequest,
 ) (*emptypb.Empty, error) {
 	// Validate the request
 	// TODO: validate fields: clear, validate required using https://github.com/einride/aip-go
 	if err := h.validator.Validate(req); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	var resourceName pb.UserResourceName
+	var resourceName gomicroservicev1.UserResourceName
 	if err := resourceName.UnmarshalString(req.GetName()); err != nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid resource name")
 	}
