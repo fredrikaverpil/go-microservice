@@ -33,6 +33,14 @@ func (r *MemoryRepository) CreateUser(
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
 
+	// Validate required fields
+	if user.DisplayName == "" {
+		return nil, domain.NewErrorInvalidInput("display_name is required", nil)
+	}
+	if user.Email == "" {
+		return nil, domain.NewErrorInvalidInput("email is required", nil)
+	}
+
 	// Extract user_id from name or generate new one
 	var userID string
 	if user.Name != "" {
@@ -52,14 +60,6 @@ func (r *MemoryRepository) CreateUser(
 			fmt.Sprintf("user already exists: %s", user.Name),
 			nil,
 		)
-	}
-
-	// Validate required fields
-	if user.DisplayName == "" {
-		return nil, domain.NewErrorInvalidInput("display_name is required", nil)
-	}
-	if user.Email == "" {
-		return nil, domain.NewErrorInvalidInput("email is required", nil)
 	}
 
 	// Create new user with timestamps
