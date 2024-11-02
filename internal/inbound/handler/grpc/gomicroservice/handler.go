@@ -6,7 +6,6 @@ import (
 	"github.com/bufbuild/protovalidate-go"
 	"github.com/fredrikaverpil/go-microservice/internal/core/domain"
 	"github.com/fredrikaverpil/go-microservice/internal/core/port"
-	genapi "github.com/fredrikaverpil/go-microservice/internal/inbound/handler/grpc/gen/go/gomicroservice/v1"
 	pb "github.com/fredrikaverpil/go-microservice/internal/inbound/handler/grpc/gen/go/gomicroservice/v1"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -34,7 +33,7 @@ func (h *GRPCHandler) CreateUser(ctx context.Context, req *pb.CreateUserRequest)
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 	if req.GetUser().GetName() != "" {
-		var resourceName genapi.UserResourceName
+		var resourceName pb.UserResourceName
 		if err := resourceName.UnmarshalString(req.GetUser().GetName()); err != nil {
 			return nil, status.Error(codes.InvalidArgument, "invalid resource name")
 		}
@@ -67,7 +66,7 @@ func (h *GRPCHandler) GetUser(ctx context.Context, req *pb.GetUserRequest) (*pb.
 	if err := h.validator.Validate(req); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	var resourceName genapi.UserResourceName
+	var resourceName pb.UserResourceName
 	if err := resourceName.UnmarshalString(req.GetName()); err != nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid resource name")
 	}
@@ -119,7 +118,7 @@ func (h *GRPCHandler) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest)
 	if err := h.validator.Validate(req); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	var resourceName genapi.UserResourceName
+	var resourceName pb.UserResourceName
 	if err := resourceName.UnmarshalString(req.GetUser().GetName()); err != nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid resource name")
 	}
@@ -147,7 +146,7 @@ func (h *GRPCHandler) DeleteUser(
 	if err := h.validator.Validate(req); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	var resourceName genapi.UserResourceName
+	var resourceName pb.UserResourceName
 	if err := resourceName.UnmarshalString(req.GetName()); err != nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid resource name")
 	}
