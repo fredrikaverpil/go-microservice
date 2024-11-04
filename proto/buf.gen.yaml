@@ -41,12 +41,12 @@ plugins:
   # https://buf.build/grpc-ecosystem/openapiv2
   # TODO: move from remote to local plugin
   - remote: buf.build/grpc-ecosystem/openapiv2
-    out: gen/openapiv2
+    out: gen/openapiv2 # public
   # openapiv3 via gnostic
   # https://buf.build/community/google-gnostic-openapi
   # TODO: move from remote to local plugin
   - remote: buf.build/community/google-gnostic-openapi
-    out: gen/openapiv3
+    out: gen/openapiv3 # public
     opt:
       - paths=source_relative
   # aip-go
