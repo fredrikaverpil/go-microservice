@@ -34,10 +34,6 @@ plugins:
   # depends on protocolbuffers, grpc-go
   # TODO: move from remote to local plugin
   - remote: buf.build/grpc-ecosystem/gateway
-    out: gen/go # public
-    opt:
-      - paths=source_relative
-  - remote: buf.build/grpc-ecosystem/gateway
     out: ../internal/inbound/handler/grpc/gen/go # internal
     opt:
       - paths=source_relative
