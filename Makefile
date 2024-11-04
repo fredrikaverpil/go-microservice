@@ -14,7 +14,7 @@ proto: proto-tools buf-dep-update proto-lint buf-generate
 proto-tools:
 	go install github.com/bufbuild/buf/cmd/buf@latest
 	go install github.com/googleapis/api-linter/cmd/api-linter@latest
-	go install go.einride.tech/aip/cmd/protoc-gen-go-aip
+	go install go.einride.tech/aip/cmd/protoc-gen-go-aip@latest
 
   # these are defined in buf.gen.yaml and their versions in buf.lock: 
   # go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
