@@ -20,7 +20,7 @@ plugins:
       - paths=source_relative
   # grpc-go
   # https://buf.build/grpc/go
-  # TODO: move from remote to local plugi
+  # TODO: move from remote to local plugin
   - remote: buf.build/grpc/go
     out: gen/go # public
     opt:
@@ -32,7 +32,7 @@ plugins:
   # grpc-gateway
   # https://buf.build/grpc-ecosystem/gateway
   # depends on protocolbuffers, grpc-go
-  # TODO: move from remote to local plugi
+  # TODO: move from remote to local plugin
   - remote: buf.build/grpc-ecosystem/gateway
     out: gen/go # public
     opt:
@@ -43,7 +43,7 @@ plugins:
       - paths=source_relative
   # openapiv2
   # https://buf.build/grpc-ecosystem/openapiv2
-  # TODO: move from remote to local plugi
+  # TODO: move from remote to local plugin
   - remote: buf.build/grpc-ecosystem/openapiv2
     out: gen/openapiv2
   # openapiv3 via gnostic
