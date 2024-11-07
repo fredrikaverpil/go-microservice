@@ -9,7 +9,7 @@ proto: proto-tools buf-dep-update proto-lint buf-generate
 # BUF_VERSION=1.28.1
 # API_LINTER_VERSION=0.1.0
 
-# Install tools
+# Install proto tools
 .PHONY: proto-tools
 proto-tools:
 	go install github.com/bufbuild/buf/cmd/buf@latest
@@ -21,10 +21,14 @@ proto-tools:
 	# go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 	# go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway@latest
 	# go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2@latest
-	
-	# AIP convenience functions, such as pagination, resourcename etc.
-	go get -u go.einride.tech/aip
 
+# Install go tools
+.PHONY: go-tools
+go-tools:
+	# AIP convenience functions, such as pagination, resourcename etc.
+	# go get -u go.einride.tech/aip
+
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 
 .PHONY: buf-dep-update
 buf-dep-update:
@@ -47,6 +51,10 @@ api-lint:
 		--output-format=yaml \
 		--set-exit-status \
 		gomicroservice/v1/*.proto
+
+.PHONY: golangci-lint
+golangci-lint:
+	golangci-lint run --enable-all
 
 .PHONY: buf-generate
 buf-generate:
