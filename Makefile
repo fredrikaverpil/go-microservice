@@ -43,7 +43,7 @@ buf-dep-update:
 proto-lint: buf-lint api-lint
 
 .PHONY: openapi-lint
-openapi-lint: openapiv2-lint openapiv3-lint
+openapi-lint: openapiv3-lint openapiv2-lint
 
 .PHONY: buf-lint
 buf-lint:
@@ -66,7 +66,7 @@ golangci-lint:
 
 .PHONY: openapiv2-lint
 openapiv2-lint:
-	go run github.com/daveshanley/vacuum@latest lint -d proto/gen/openapiv2/**/*.json
+	go run github.com/daveshanley/vacuum@latest lint -d proto/gen/openapiv2/gomicroservice/**/*.json
 
 .PHONY: openapiv3-lint
 openapiv3-lint:
