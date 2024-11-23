@@ -62,7 +62,7 @@ api-lint:
 
 .PHONY: golangci-lint
 golangci-lint:
-	golangci-lint run --enable-all
+	golangci-lint run --config .golangci.yaml
 
 .PHONY: openapiv2-lint
 openapiv2-lint:
