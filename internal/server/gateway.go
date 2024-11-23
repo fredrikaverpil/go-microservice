@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	gomicroservicev1 "github.com/fredrikaverpil/go-microservice/internal/inbound/handler/grpc/gen/go/gomicroservice/v1"
+	gomicroservicev1 "github.com/fredrikaverpil/go-microservice/internal/gen/gomicroservice/v1"
 	"github.com/fredrikaverpil/go-microservice/internal/middleware"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"

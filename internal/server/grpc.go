@@ -8,7 +8,7 @@ import (
 	"github.com/bufbuild/protovalidate-go"
 	"github.com/fredrikaverpil/go-microservice/internal/config"
 	"github.com/fredrikaverpil/go-microservice/internal/core/service"
-	gomicroservicev1 "github.com/fredrikaverpil/go-microservice/internal/inbound/handler/grpc/gen/go/gomicroservice/v1"
+	gomicroservicev1 "github.com/fredrikaverpil/go-microservice/internal/gen/gomicroservice/v1"
 	"github.com/fredrikaverpil/go-microservice/internal/inbound/handler/grpc/gomicroservice"
 	"github.com/fredrikaverpil/go-microservice/internal/middleware"
 	"github.com/fredrikaverpil/go-microservice/internal/outbound/db"
