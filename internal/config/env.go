@@ -2,13 +2,13 @@ package config
 
 import "os"
 
-// Environment values
+// Environment values.
 const (
 	EnvDevelopment = "development"
 	EnvProduction  = "production"
 )
 
-// GetEnvironment returns the current environment, defaulting to production
+// GetEnvironment returns the current environment, defaulting to production.
 func GetEnvironment() string {
 	env := os.Getenv("GO_ENV")
 	if env == "" {
@@ -17,7 +17,7 @@ func GetEnvironment() string {
 	return env
 }
 
-// IsDevelopment returns true if running in development environment
+// IsDevelopment returns true if running in development environment.
 func IsDevelopment() bool {
 	return GetEnvironment() == EnvDevelopment
 }

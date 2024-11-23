@@ -10,7 +10,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-// Domain to Proto conversions
+// Domain to Proto conversions.
 func toProtoUser(user *domain.User) *gomicroservicev1.User {
 	return &gomicroservicev1.User{
 		Name:        user.Name,
@@ -21,12 +21,12 @@ func toProtoUser(user *domain.User) *gomicroservicev1.User {
 	}
 }
 
-// Proto to Domain conversions
+// Proto to Domain conversions.
 func toDomainUser(pbUser *gomicroservicev1.User) *domain.User {
 	return &domain.User{
-		Name:        pbUser.Name,
-		DisplayName: pbUser.DisplayName,
-		Email:       pbUser.Email,
+		Name:        pbUser.GetName(),
+		DisplayName: pbUser.GetDisplayName(),
+		Email:       pbUser.GetEmail(),
 		CreateTime:  pbUser.GetCreateTime().AsTime(),
 		UpdateTime:  pbUser.GetUpdateTime().AsTime(),
 	}
@@ -40,7 +40,7 @@ func checkTransientError(err error) error {
 		return nil
 	}
 
-	switch customErr.Type {
+	switch customErr.Type { //nolint:exhaustive // We only care about these specific errors.
 	case domain.Timeout:
 		return status.Error(codes.DeadlineExceeded, customErr.Message)
 	case domain.Unavailable:
@@ -67,7 +67,7 @@ func toCreateUserError(err error) error {
 		return status.Error(codes.Internal, "internal error")
 	}
 
-	switch customErr.Type {
+	switch customErr.Type { //nolint:exhaustive // We only care about these specific errors.
 	case domain.AlreadyExists:
 		return status.Error(codes.AlreadyExists, customErr.Message)
 	case domain.InvalidInput:
@@ -91,7 +91,7 @@ func toGetUserError(err error) error {
 		return status.Error(codes.Internal, "internal error")
 	}
 
-	switch customErr.Type {
+	switch customErr.Type { //nolint:exhaustive // We only care about these specific errors.
 	case domain.NotFound:
 		return status.Error(codes.NotFound, customErr.Message)
 	default:
@@ -113,7 +113,7 @@ func toListUsersError(err error) error {
 		return status.Error(codes.Internal, "internal error")
 	}
 
-	switch customErr.Type {
+	switch customErr.Type { //nolint:exhaustive // We only care about these specific errors.
 	case domain.InvalidInput:
 		return status.Error(codes.InvalidArgument, customErr.Message)
 	default:
@@ -136,7 +136,7 @@ func toUpdateUserError(err error) error {
 		return status.Error(codes.Internal, "internal error")
 	}
 
-	switch customErr.Type {
+	switch customErr.Type { //nolint:exhaustive // We only care about these specific errors.
 	case domain.NotFound:
 		return status.Error(codes.NotFound, customErr.Message)
 	case domain.InvalidInput:
@@ -160,7 +160,7 @@ func toDeleteUserError(err error) error {
 		return status.Error(codes.Internal, "internal error")
 	}
 
-	switch customErr.Type {
+	switch customErr.Type { //nolint:exhaustive // We only care about these specific errors.
 	case domain.NotFound:
 		return status.Error(codes.NotFound, customErr.Message)
 	default:

@@ -25,7 +25,7 @@ func NewGRPCHandler(userService port.UserService, validator *protovalidate.Valid
 	}
 }
 
-// CreateUser implements AIP-133
+// CreateUser implements AIP-133.
 func (h *GRPCHandler) CreateUser(
 	ctx context.Context,
 	req *gomicroservicev1.CreateUserRequest,
@@ -44,12 +44,12 @@ func (h *GRPCHandler) CreateUser(
 
 	// Convert
 	user := &domain.User{
-		DisplayName: req.GetUser().DisplayName,
-		Email:       req.GetUser().Email,
+		DisplayName: req.GetUser().GetDisplayName(),
+		Email:       req.GetUser().GetEmail(),
 	}
 	// If user_id is provided, use it
-	if req.UserId != "" {
-		user.Name = "users/" + req.UserId
+	if req.GetUserId() != "" {
+		user.Name = "users/" + req.GetUserId()
 	}
 
 	// Create
@@ -62,7 +62,7 @@ func (h *GRPCHandler) CreateUser(
 	return toProtoUser(createdUser), nil
 }
 
-// GetUser implements AIP-131
+// GetUser implements AIP-131.
 func (h *GRPCHandler) GetUser(
 	ctx context.Context,
 	req *gomicroservicev1.GetUserRequest,
@@ -87,7 +87,7 @@ func (h *GRPCHandler) GetUser(
 	return toProtoUser(user), nil
 }
 
-// ListUsers implements AIP-132
+// ListUsers implements AIP-132.
 func (h *GRPCHandler) ListUsers(
 	ctx context.Context,
 	req *gomicroservicev1.ListUsersRequest,
@@ -118,7 +118,7 @@ func (h *GRPCHandler) ListUsers(
 	}, nil
 }
 
-// UpdateUser implements AIP-134
+// UpdateUser implements AIP-134.
 func (h *GRPCHandler) UpdateUser(
 	ctx context.Context,
 	req *gomicroservicev1.UpdateUserRequest,
@@ -145,7 +145,7 @@ func (h *GRPCHandler) UpdateUser(
 	return toProtoUser(updatedUser), nil
 }
 
-// DeleteUser implements AIP-135
+// DeleteUser implements AIP-135.
 func (h *GRPCHandler) DeleteUser(
 	ctx context.Context,
 	req *gomicroservicev1.DeleteUserRequest,

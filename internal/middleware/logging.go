@@ -10,7 +10,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-// HTTP logging middleware
+// HTTP logging middleware.
 type responseWriter struct {
 	http.ResponseWriter
 	status int
@@ -50,9 +50,13 @@ func loggingMiddleware(logger *slog.Logger) HTTPMiddleware {
 	}
 }
 
-// gRPC logging middleware
+// gRPC logging middleware.
 func unaryLoggingInterceptor(logger *slog.Logger) grpc.UnaryServerInterceptor {
-	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+	return func(
+		ctx context.Context,
+		req interface{},
+		info *grpc.UnaryServerInfo, handler grpc.UnaryHandler,
+	) (interface{}, error) {
 		start := time.Now()
 
 		// Log request

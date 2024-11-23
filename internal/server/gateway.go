@@ -4,6 +4,7 @@ import (
 	"context"
 	"log/slog"
 	"net/http"
+	"time"
 
 	gomicroservicev1 "github.com/fredrikaverpil/go-microservice/internal/inbound/handler/grpc/gen/go/gomicroservice/v1"
 	"github.com/fredrikaverpil/go-microservice/internal/middleware"
@@ -15,7 +16,7 @@ import (
 type GatewayServer struct {
 	server *http.Server
 	logger *slog.Logger
-	state  ServerState
+	state  State
 	ready  bool
 }
 
@@ -40,8 +41,9 @@ func NewGatewayServer(
 	handler := middleware.WithHTTPMiddlewares(mux, middleware.HTTPServerMiddlewares(logger)...)
 
 	server := &http.Server{
-		Addr:    ":" + port,
-		Handler: handler,
+		Addr:              ":" + port,
+		Handler:           handler,
+		ReadHeaderTimeout: 5 * time.Second,
 	}
 
 	return &GatewayServer{
@@ -67,7 +69,7 @@ func (s *GatewayServer) Start() error {
 func (s *GatewayServer) Stop(ctx context.Context) error {
 	s.state = StateShuttingDown
 	s.ready = false
-	s.logger.Info("HTTP gateway server stopping")
+	s.logger.InfoContext(ctx, "HTTP gateway server stopping")
 	err := s.server.Shutdown(ctx)
 	s.state = StateStopped
 	return err
@@ -81,6 +83,6 @@ func (s *GatewayServer) HealthCheck() bool {
 	return s.state == StateRunning && s.ready
 }
 
-func (s *GatewayServer) State() ServerState {
+func (s *GatewayServer) State() State {
 	return s.state
 }

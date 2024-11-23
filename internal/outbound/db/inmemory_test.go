@@ -13,8 +13,12 @@ import (
 	"gotest.tools/v3/assert"
 )
 
-// ignoredTimeFields defines which User fields to ignore in comparisons
-var ignoredTimeFields = cmpopts.IgnoreFields(domain.User{}, "CreateTime", "UpdateTime")
+// ignoredTimeFields defines which User fields to ignore in comparisons.
+var ignoredTimeFields = cmpopts.IgnoreFields( //nolint:gochecknoglobals // this is just a test file
+	domain.User{},
+	"CreateTime",
+	"UpdateTime",
+)
 
 func setupTestRepo(_ *testing.T) *MemoryRepository {
 	logger := slog.Default()
@@ -22,7 +26,7 @@ func setupTestRepo(_ *testing.T) *MemoryRepository {
 	return repo
 }
 
-// isRecentTime returns true if the given time is within the last second
+// isRecentTime returns true if the given time is within the last second.
 func isRecentTime(t time.Time) bool {
 	now := time.Now().UTC()
 	difference := now.Sub(t)
@@ -30,10 +34,10 @@ func isRecentTime(t time.Time) bool {
 }
 
 // assertValidTimestamps verifies that CreateTime and UpdateTime are:
-// - Not zero
-// - In UTC
-// - Recent (within the last second)
-// - UpdateTime is not before CreateTime
+// - Not zero.
+// - In UTC.
+// - Recent (within the last second).
+// - UpdateTime is not before CreateTime.
 func assertValidTimestamps(t *testing.T, user *domain.User) {
 	t.Helper()
 
@@ -50,7 +54,7 @@ func assertValidTimestamps(t *testing.T, user *domain.User) {
 		"UpdateTime should not be before CreateTime")
 }
 
-// TestCreateUser tests the Create method following AIP-133 (Create Resource)
+// TestCreateUser tests the Create method following AIP-133 (Create Resource).
 func TestCreateUser(t *testing.T) {
 	t.Parallel()
 
@@ -166,7 +170,7 @@ func TestCreateUser(t *testing.T) {
 	})
 }
 
-// TestGetUser tests the Get method following AIP-131 (Get Resource)
+// TestGetUser tests the Get method following AIP-131 (Get Resource).
 func TestGetUser(t *testing.T) {
 	t.Parallel()
 
