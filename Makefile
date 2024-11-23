@@ -30,12 +30,20 @@ go-tools:
 
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 
+# Install openapi tools
+.PHONY: openapi-tools
+openapi-tools:
+	go install github.com/daveshanley/vacuum@latest
+
 .PHONY: buf-dep-update
 buf-dep-update:
 	cd proto && buf dep update
 
 .PHONY: proto-lint
 proto-lint: buf-lint api-lint
+
+.PHONY: openapi-lint
+openapi-lint: openapiv2-lint openapiv3-lint
 
 .PHONY: buf-lint
 buf-lint:
@@ -55,6 +63,14 @@ api-lint:
 .PHONY: golangci-lint
 golangci-lint:
 	golangci-lint run --enable-all
+
+.PHONY: openapiv2-lint
+openapiv2-lint:
+	go run github.com/daveshanley/vacuum@latest lint -d proto/gen/openapiv2/**/*.json
+
+.PHONY: openapiv3-lint
+openapiv3-lint:
+	go run github.com/daveshanley/vacuum@latest lint -d proto/gen/openapiv3/*.yaml
 
 .PHONY: buf-generate
 buf-generate:
