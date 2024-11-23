@@ -23,7 +23,7 @@ func NewUserService(logger *slog.Logger, repo port.UserRepository) port.UserServ
 func (s *UserService) CreateUser(ctx context.Context, user *domain.User) (*domain.User, error) {
 	createdUser, err := s.repo.CreateUser(ctx, user)
 	if err != nil {
-		s.logger.Error("failed to create user",
+		s.logger.ErrorContext(ctx, "failed to create user",
 			"error", err,
 			"user", user.Name,
 		)
@@ -35,7 +35,7 @@ func (s *UserService) CreateUser(ctx context.Context, user *domain.User) (*domai
 func (s *UserService) GetUser(ctx context.Context, name string) (*domain.User, error) {
 	user, err := s.repo.GetUser(ctx, name)
 	if err != nil {
-		s.logger.Error("failed to get user",
+		s.logger.ErrorContext(ctx, "failed to get user",
 			"error", err,
 			"name", name,
 		)
@@ -51,7 +51,7 @@ func (s *UserService) ListUsers(
 ) ([]*domain.User, string, error) {
 	users, nextToken, err := s.repo.ListUsers(ctx, pageSize, pageToken)
 	if err != nil {
-		s.logger.Error("failed to list users",
+		s.logger.ErrorContext(ctx, "failed to list users",
 			"error", err,
 			"pageSize", pageSize,
 			"pageToken", pageToken,
@@ -64,7 +64,7 @@ func (s *UserService) ListUsers(
 func (s *UserService) UpdateUser(ctx context.Context, user *domain.User) (*domain.User, error) {
 	updatedUser, err := s.repo.UpdateUser(ctx, user)
 	if err != nil {
-		s.logger.Error("failed to update user",
+		s.logger.ErrorContext(ctx, "failed to update user",
 			"error", err,
 			"user", user.Name,
 		)
@@ -75,7 +75,7 @@ func (s *UserService) UpdateUser(ctx context.Context, user *domain.User) (*domai
 
 func (s *UserService) DeleteUser(ctx context.Context, name string) error {
 	if err := s.repo.DeleteUser(ctx, name); err != nil {
-		s.logger.Error("failed to delete user",
+		s.logger.ErrorContext(ctx, "failed to delete user",
 			"error", err,
 			"name", name,
 		)

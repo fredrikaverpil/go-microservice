@@ -22,7 +22,7 @@ type GRPCServer struct {
 	logger   *slog.Logger
 	listener net.Listener
 	ready    bool
-	state    ServerState
+	state    State
 }
 
 func NewGRPCServer(
@@ -93,7 +93,7 @@ func (s *GRPCServer) Stop(ctx context.Context) error {
 		s.state = StateStopped
 		return ctx.Err()
 	case <-stopped:
-		s.logger.Info("gRPC server stopped gracefully")
+		s.logger.InfoContext(ctx, "gRPC server stopped gracefully")
 		s.state = StateStopped
 		return nil
 	}
@@ -111,6 +111,6 @@ func (s *GRPCServer) HealthCheck() bool {
 	return s.state == StateRunning && s.ready
 }
 
-func (s *GRPCServer) State() ServerState {
+func (s *GRPCServer) State() State {
 	return s.state
 }

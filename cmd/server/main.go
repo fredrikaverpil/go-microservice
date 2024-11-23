@@ -50,23 +50,25 @@ func main() {
 	}
 
 	// Create error channel for startup errors
-	startupErrors := make(chan error, 3) // 3 for gRPC, gateway, and health check
+	errors := []string{"gRPC", "gateway", "health check"}
+	startupErrors := make(chan error, len(errors))
 	defer close(startupErrors)
 
 	// Create WaitGroup for all servers
 	var wg sync.WaitGroup
-	wg.Add(3) // gRPC, gateway, and health check servers
+	wg.Add(len(errors))
 
 	// Add health check endpoint
 	healthServer := &http.Server{
 		Addr: ":8081",
-		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		Handler: http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 			if !gatewayServer.HealthCheck() || !grpcServer.HealthCheck() {
 				w.WriteHeader(http.StatusServiceUnavailable)
 				return
 			}
 			w.WriteHeader(http.StatusOK)
 		}),
+		ReadHeaderTimeout: 5 * time.Second, // Set ReadHeaderTimeout to mitigate Slowloris attack
 	}
 	go func() {
 		defer wg.Done()
@@ -99,7 +101,8 @@ func main() {
 	select {
 	case err := <-startupErrors:
 		logger.Error("Server startup failed", "error", err)
-		os.Exit(1)
+		defer os.Exit(1)
+		return
 	case <-quit:
 		logger.Info("Initiating graceful shutdown")
 	}
