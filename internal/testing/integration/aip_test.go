@@ -2,35 +2,25 @@ package integration
 
 import (
 	"context"
-	"encoding/base32"
-	"regexp"
+	"fmt"
+	"sync/atomic"
 	"testing"
 
 	gomicroservicev1 "github.com/fredrikaverpil/go-microservice/internal/gen/gomicroservice/v1"
-	"github.com/google/uuid"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type aipTests struct{}
 
-var _ gomicroservicev1.ServiceConfigProviders = &aipTests{}
+var (
+	_ gomicroservicev1.ServiceConfigProviders = &aipTests{}
+
+	// counter to keep track of unique IDs.
+	idCounter uint64 //nolint:gochecknoglobals // used for generating unique IDs.
+)
 
 func TestUserService(t *testing.T) {
 	gomicroservicev1.TestServices(t, &aipTests{})
-}
-
-// NewSystemGenerated returns a new system-generated resource ID encoded as base32 lowercase.
-func NewSystemGeneratedBase32() string {
-	base32Encoding := base32.NewEncoding("abcdefghijklmnopqrstuvwxyz234567").WithPadding(base32.NoPadding)
-	regexp := regexp.MustCompile(`^[a-z]([a-z0-9-]{0,61}[a-z0-9])?$`)
-	// Retry creating id until it matches the regexp
-	for {
-		id := uuid.New()
-		encodedID := base32Encoding.EncodeToString(id[:])
-		if regexp.MatchString(encodedID) {
-			return encodedID
-		}
-	}
 }
 
 func (a aipTests) UserServiceUser(_ *testing.T) *gomicroservicev1.UserServiceUserTestSuiteConfig {
@@ -54,11 +44,10 @@ func (a aipTests) UserServiceUser(_ *testing.T) *gomicroservicev1.UserServiceUse
 				UpdateTime:  now,
 			}
 		},
-		// NOTE: the generator provided by resourceid does not follow the regex from
-		// https://google.aip.dev/122#resource-id-segments
-		//
-		// IDGenerator: resourceid.NewSystemGeneratedBase32,
-		IDGenerator: NewSystemGeneratedBase32,
+		IDGenerator: func() string {
+			id := atomic.AddUint64(&idCounter, 1)
+			return fmt.Sprintf("valid-id-%d", id)
+		},
 		Update: func() *gomicroservicev1.User {
 			now := timestamppb.Now()
 			return &gomicroservicev1.User{
