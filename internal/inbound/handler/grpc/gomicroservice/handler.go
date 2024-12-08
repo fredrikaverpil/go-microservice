@@ -6,7 +6,10 @@ import (
 	"github.com/bufbuild/protovalidate-go"
 	"github.com/fredrikaverpil/go-microservice/internal/core/domain"
 	"github.com/fredrikaverpil/go-microservice/internal/core/port"
-	gomicroservicev1 "github.com/fredrikaverpil/go-microservice/internal/inbound/handler/grpc/gen/go/gomicroservice/v1"
+	gomicroservicev1 "github.com/fredrikaverpil/go-microservice/internal/gen/gomicroservice/v1"
+	"go.einride.tech/aip/fieldbehavior"
+	"go.einride.tech/aip/resourceid"
+	"google.golang.org/genproto/googleapis/api/annotations"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -31,15 +34,12 @@ func (h *GRPCHandler) CreateUser(
 	req *gomicroservicev1.CreateUserRequest,
 ) (*gomicroservicev1.User, error) {
 	// Validate the request
-	// TODO: validate fields: clear, validate required using https://github.com/einride/aip-go
 	if err := h.validator.Validate(req); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	if req.GetUser().GetName() != "" {
-		var resourceName gomicroservicev1.UserResourceName
-		if err := resourceName.UnmarshalString(req.GetUser().GetName()); err != nil {
-			return nil, status.Error(codes.InvalidArgument, "invalid resource name")
-		}
+	fieldbehavior.ClearFields(req, annotations.FieldBehavior_OUTPUT_ONLY, annotations.FieldBehavior_IDENTIFIER)
+	if err := fieldbehavior.ValidateRequiredFields(req); err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
 	// Convert
@@ -47,9 +47,16 @@ func (h *GRPCHandler) CreateUser(
 		DisplayName: req.GetUser().GetDisplayName(),
 		Email:       req.GetUser().GetEmail(),
 	}
-	// If user_id is provided, use it
 	if req.GetUserId() != "" {
-		user.Name = "users/" + req.GetUserId()
+		// If user_id is provided, use it
+		userId := req.GetUserId() //nolint:revive,stylecheck // userId is valid as it was generated.
+		if err := resourceid.ValidateUserSettable(userId); err != nil {
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+		user.Name = "users/" + userId
+	} else {
+		// Generate a new name using the proper format
+		user.Name = "users/" + resourceid.NewSystemGeneratedBase32()
 	}
 
 	// Create
@@ -68,13 +75,18 @@ func (h *GRPCHandler) GetUser(
 	req *gomicroservicev1.GetUserRequest,
 ) (*gomicroservicev1.User, error) {
 	// Validate the request
-	// TODO: validate fields: clear, validate required using https://github.com/einride/aip-go
 	if err := h.validator.Validate(req); err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+	if err := fieldbehavior.ValidateRequiredFields(req); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 	var resourceName gomicroservicev1.UserResourceName
 	if err := resourceName.UnmarshalString(req.GetName()); err != nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid resource name")
+	}
+	if resourceName.ContainsWildcard() {
+		return nil, status.Error(codes.InvalidArgument, "wildcard not allowed")
 	}
 
 	// Get
@@ -94,6 +106,9 @@ func (h *GRPCHandler) ListUsers(
 ) (*gomicroservicev1.ListUsersResponse, error) {
 	// Validate the request
 	if err := h.validator.Validate(req); err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+	if err := fieldbehavior.ValidateRequiredFields(req); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
@@ -123,8 +138,12 @@ func (h *GRPCHandler) UpdateUser(
 	ctx context.Context,
 	req *gomicroservicev1.UpdateUserRequest,
 ) (*gomicroservicev1.User, error) {
-	// Validate the request (includes required fields and format validation)
+	// Validate the request
 	if err := h.validator.Validate(req); err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+	fieldbehavior.ClearFields(req, annotations.FieldBehavior_OUTPUT_ONLY)
+	if err := fieldbehavior.ValidateRequiredFields(req); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 	var resourceName gomicroservicev1.UserResourceName
@@ -151,13 +170,19 @@ func (h *GRPCHandler) DeleteUser(
 	req *gomicroservicev1.DeleteUserRequest,
 ) (*emptypb.Empty, error) {
 	// Validate the request
-	// TODO: validate fields: clear, validate required using https://github.com/einride/aip-go
 	if err := h.validator.Validate(req); err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+	fieldbehavior.ClearFields(req, annotations.FieldBehavior_OUTPUT_ONLY)
+	if err := fieldbehavior.ValidateRequiredFields(req); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 	var resourceName gomicroservicev1.UserResourceName
 	if err := resourceName.UnmarshalString(req.GetName()); err != nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid resource name")
+	}
+	if resourceName.ContainsWildcard() {
+		return nil, status.Error(codes.InvalidArgument, "wildcard not allowed")
 	}
 
 	// Delete

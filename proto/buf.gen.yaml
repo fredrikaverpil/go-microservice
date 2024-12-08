@@ -15,7 +15,7 @@ plugins:
     opt:
       - paths=source_relative
   - remote: buf.build/protocolbuffers/go
-    out: ../internal/inbound/handler/grpc/gen/go # internal
+    out: ../internal/gen # internal
     opt:
       - paths=source_relative
   # grpc-go
@@ -26,7 +26,7 @@ plugins:
     opt:
       - paths=source_relative
   - remote: buf.build/grpc/go
-    out: ../internal/inbound/handler/grpc/gen/go # internal
+    out: ../internal/gen # internal
     opt:
       - paths=source_relative
   # grpc-gateway
@@ -34,7 +34,7 @@ plugins:
   # depends on protocolbuffers, grpc-go
   # TODO: move from remote to local plugin
   - remote: buf.build/grpc-ecosystem/gateway
-    out: ../internal/inbound/handler/grpc/gen/go # internal
+    out: ../internal/gen # internal
     opt:
       - paths=source_relative
   # openapiv2
@@ -56,6 +56,12 @@ plugins:
     opt:
       - paths=source_relative
   - local: protoc-gen-go-aip
-    out: ../internal/inbound/handler/grpc/gen/go # internal
+    out: ../internal/gen # internal
+    opt:
+      - paths=source_relative
+  # go-aip-test
+  # https://github.com/einride/protoc-gen-go-aip-test
+  - local: protoc-gen-go-aip-test
+    out: ../internal/gen # internal
     opt:
       - paths=source_relative
