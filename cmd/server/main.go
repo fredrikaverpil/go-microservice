@@ -1,4 +1,4 @@
-package main
+package main //nolint:cyclop // ignoring complexity warning
 
 import (
 	"context"
@@ -16,10 +16,11 @@ import (
 )
 
 const (
-	grpcPort        = "50051"
-	httpPort        = "8080"
-	shutdownTimeout = 30 * time.Second
-	shutdownGrace   = 2 * time.Second
+	grpcPort          = "50051"
+	httpPort          = "8080"
+	readHeaderTimeout = 5 * time.Second
+	shutdownTimeout   = 30 * time.Second
+	shutdownGrace     = 2 * time.Second
 )
 
 func main() {
@@ -68,7 +69,7 @@ func main() {
 			}
 			w.WriteHeader(http.StatusOK)
 		}),
-		ReadHeaderTimeout: 5 * time.Second, // Set ReadHeaderTimeout to mitigate Slowloris attack
+		ReadHeaderTimeout: readHeaderTimeout, // Set ReadHeaderTimeout to mitigate Slowloris attack
 	}
 	go func() {
 		defer wg.Done()

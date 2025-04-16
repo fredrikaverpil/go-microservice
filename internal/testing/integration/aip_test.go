@@ -1,4 +1,4 @@
-package integration
+package integration //nolint:testpackage // ignoring the testpackage suggestion
 
 import (
 	"context"
