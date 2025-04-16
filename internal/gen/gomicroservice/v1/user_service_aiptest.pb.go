@@ -179,10 +179,6 @@ func (fx *UserServiceUserTestSuiteConfig) testCreate(t *testing.T) {
 				id:   "fooö",
 			},
 			{
-				name: "too short",
-				id:   "foo",
-			},
-			{
 				name: "too long",
 				id:   "fooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo",
 			},
@@ -390,76 +386,78 @@ func (fx *UserServiceUserTestSuiteConfig) testUpdate(t *testing.T) {
 		assert.DeepEqual(t, originalCreateTime, updated.CreateTime, protocmp.Transform())
 	})
 
-	created := fx.create(t)
-	// Method should fail with NotFound if the resource does not exist.
-	t.Run("not found", func(t *testing.T) {
-		fx.maybeSkip(t)
-		msg := fx.Update()
-		msg.Name = created.Name + "notfound"
-		_, err := fx.Service().UpdateUser(fx.Context(), &UpdateUserRequest{
-			User: msg,
-		})
-		assert.Equal(t, codes.NotFound, status.Code(err), err)
-	})
-
-	// The method should fail with InvalidArgument if the update_mask is invalid.
-	t.Run("invalid update mask", func(t *testing.T) {
-		fx.maybeSkip(t)
-		_, err := fx.Service().UpdateUser(fx.Context(), &UpdateUserRequest{
-			User: created,
-			UpdateMask: &fieldmaskpb.FieldMask{
-				Paths: []string{
-					"invalid_field_xyz",
-				},
-			},
-		})
-		assert.Equal(t, codes.InvalidArgument, status.Code(err), err)
-	})
-
-	// Method should fail with InvalidArgument if any required field is missing
-	// when called with '*' update_mask.
-	t.Run("required fields", func(t *testing.T) {
-		fx.maybeSkip(t)
-		t.Run(".display_name", func(t *testing.T) {
+	{
+		created := fx.create(t)
+		// Method should fail with NotFound if the resource does not exist.
+		t.Run("not found", func(t *testing.T) {
 			fx.maybeSkip(t)
-			msg := proto.Clone(created).(*User)
-			container := msg
-			if container == nil {
-				t.Skip("not reachable")
-			}
-			fd := container.ProtoReflect().Descriptor().Fields().ByName("display_name")
-			container.ProtoReflect().Clear(fd)
+			msg := fx.Update()
+			msg.Name = created.Name + "notfound"
 			_, err := fx.Service().UpdateUser(fx.Context(), &UpdateUserRequest{
 				User: msg,
+			})
+			assert.Equal(t, codes.NotFound, status.Code(err), err)
+		})
+
+		// The method should fail with InvalidArgument if the update_mask is invalid.
+		t.Run("invalid update mask", func(t *testing.T) {
+			fx.maybeSkip(t)
+			_, err := fx.Service().UpdateUser(fx.Context(), &UpdateUserRequest{
+				User: created,
 				UpdateMask: &fieldmaskpb.FieldMask{
 					Paths: []string{
-						"*",
+						"invalid_field_xyz",
 					},
 				},
 			})
 			assert.Equal(t, codes.InvalidArgument, status.Code(err), err)
 		})
-		t.Run(".email", func(t *testing.T) {
-			fx.maybeSkip(t)
-			msg := proto.Clone(created).(*User)
-			container := msg
-			if container == nil {
-				t.Skip("not reachable")
-			}
-			fd := container.ProtoReflect().Descriptor().Fields().ByName("email")
-			container.ProtoReflect().Clear(fd)
-			_, err := fx.Service().UpdateUser(fx.Context(), &UpdateUserRequest{
-				User: msg,
-				UpdateMask: &fieldmaskpb.FieldMask{
-					Paths: []string{
-						"*",
-					},
-				},
-			})
-			assert.Equal(t, codes.InvalidArgument, status.Code(err), err)
-		})
-	})
 
+		// Method should fail with InvalidArgument if any required field is missing
+		// when called with '*' update_mask.
+		t.Run("required fields", func(t *testing.T) {
+			fx.maybeSkip(t)
+			t.Run(".display_name", func(t *testing.T) {
+				fx.maybeSkip(t)
+				msg := proto.Clone(created).(*User)
+				container := msg
+				if container == nil {
+					t.Skip("not reachable")
+				}
+				fd := container.ProtoReflect().Descriptor().Fields().ByName("display_name")
+				container.ProtoReflect().Clear(fd)
+				_, err := fx.Service().UpdateUser(fx.Context(), &UpdateUserRequest{
+					User: msg,
+					UpdateMask: &fieldmaskpb.FieldMask{
+						Paths: []string{
+							"*",
+						},
+					},
+				})
+				assert.Equal(t, codes.InvalidArgument, status.Code(err), err)
+			})
+			t.Run(".email", func(t *testing.T) {
+				fx.maybeSkip(t)
+				msg := proto.Clone(created).(*User)
+				container := msg
+				if container == nil {
+					t.Skip("not reachable")
+				}
+				fd := container.ProtoReflect().Descriptor().Fields().ByName("email")
+				container.ProtoReflect().Clear(fd)
+				_, err := fx.Service().UpdateUser(fx.Context(), &UpdateUserRequest{
+					User: msg,
+					UpdateMask: &fieldmaskpb.FieldMask{
+						Paths: []string{
+							"*",
+						},
+					},
+				})
+				assert.Equal(t, codes.InvalidArgument, status.Code(err), err)
+			})
+		})
+
+	}
 }
 
 func (fx *UserServiceUserTestSuiteConfig) testList(t *testing.T) {
