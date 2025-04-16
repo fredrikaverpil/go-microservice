@@ -1,7 +1,6 @@
 package db_test
 
 import (
-	"context"
 	"log/slog"
 	"strings"
 	"testing"
@@ -63,7 +62,7 @@ func TestCreateUser(t *testing.T) {
 		t.Parallel()
 		t.Skip()
 		repo := setupTestRepo(t)
-		ctx := context.Background()
+		ctx := t.Context()
 
 		inputUser := &domain.User{
 			DisplayName: "Test User",
@@ -91,7 +90,7 @@ func TestCreateUser(t *testing.T) {
 	t.Run("success with provided ID", func(t *testing.T) {
 		t.Parallel()
 		repo := setupTestRepo(t)
-		ctx := context.Background()
+		ctx := t.Context()
 
 		inputUser := &domain.User{
 			Name:        "users/test123",
@@ -117,7 +116,7 @@ func TestCreateUser(t *testing.T) {
 	t.Run("failure - already exists", func(t *testing.T) {
 		t.Parallel()
 		repo := setupTestRepo(t)
-		ctx := context.Background()
+		ctx := t.Context()
 
 		user := &domain.User{
 			Name:        "users/duplicate",
@@ -141,7 +140,7 @@ func TestCreateUser(t *testing.T) {
 		t.Parallel()
 		t.Skip()
 		repo := setupTestRepo(t)
-		ctx := context.Background()
+		ctx := t.Context()
 
 		user := &domain.User{
 			Name:        "invalid-format", // this should fail as it doesn't follow users/{user} format
@@ -159,7 +158,7 @@ func TestCreateUser(t *testing.T) {
 	t.Run("failure - missing required fields", func(t *testing.T) {
 		t.Parallel()
 		repo := setupTestRepo(t)
-		ctx := context.Background()
+		ctx := t.Context()
 
 		user := &domain.User{
 			Name: "users/test123",
@@ -180,7 +179,7 @@ func TestGetUser(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		t.Parallel()
 		repo := setupTestRepo(t)
-		ctx := context.Background()
+		ctx := t.Context()
 
 		inputUser := &domain.User{
 			Name:        "users/test123",
@@ -212,7 +211,7 @@ func TestGetUser(t *testing.T) {
 	t.Run("failure - not found", func(t *testing.T) {
 		t.Parallel()
 		repo := setupTestRepo(t)
-		ctx := context.Background()
+		ctx := t.Context()
 
 		_, err := repo.GetUser(ctx, "users/nonexistent")
 		assert.DeepEqual(t, err, &domain.Error{
