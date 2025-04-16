@@ -13,7 +13,7 @@ func corsMiddleware() HTTPMiddleware {
 			allowedOrigins := []string{
 				"https://docs.example.com",
 				"https://app.example.com",
-				"http://localhost:8090", // For local development
+				"http://localhost:8090", // For cmd/swagger/main.go
 			}
 
 			origin := r.Header.Get("Origin")

@@ -13,15 +13,7 @@ window.onload = function () {
 		plugins: [
 			SwaggerUIBundle.plugins.DownloadUrl
 		],
-		layout: "StandaloneLayout",
-
-		requestInterceptor: function (req) {
-			// Only modify actual API requests, not the initial spec loading
-			if (!req.url.endsWith('.yaml') && !req.url.endsWith('.json')) {
-				req.url = req.url.replace(window.location.origin, "http://localhost:8080");
-			}
-			return req;
-		}
+		layout: "StandaloneLayout"
 	});
 
 	//</editor-fold>

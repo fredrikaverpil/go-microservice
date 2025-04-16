@@ -109,7 +109,8 @@ openapi-docs-static:
 .PHONY: openapi-download-swagger-ui-files
 openapi-download-swagger-ui-files:
     # Clean
-	rm -rf cmd/openapi/swagger-ui/*
+	rm -rf swagger-ui
+	mkdir swagger-ui
 
 	# Download and extract Swagger UI files
 	curl -L https://github.com/swagger-api/swagger-ui/archive/refs/tags/v5.21.0.tar.gz | tar xz
@@ -120,8 +121,5 @@ openapi-download-swagger-ui-files:
 	# Clean up the downloaded archive
 	rm -rf swagger-ui-5.21.0
 
-    # Copy yaml file to swagger-ui directory
-	cp proto/gen/openapiv3/openapi.yaml cmd/openapi/swagger-ui/openapi.yaml
-
-    # Change the default URL to your OpenAPI spec
-	sed -i 's#url: "https://petstore.swagger.io/v2/swagger.json",#url: "/api/openapi.yaml",#g' cmd/openapi/swagger-ui/swagger-initializer.js
+    # Change the default URL to the OpenAPI spec
+	sed -i 's#url: "https://petstore.swagger.io/v2/swagger.json",#url: "/api/openapi.yaml",#g' swagger-ui/swagger-initializer.js

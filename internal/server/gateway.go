@@ -4,8 +4,10 @@ import (
 	"context"
 	"log/slog"
 	"net/http"
+	"strings"
 	"time"
 
+	"github.com/fredrikaverpil/go-microservice/internal/config"
 	gomicroservicev1 "github.com/fredrikaverpil/go-microservice/internal/gen/gomicroservice/v1"
 	"github.com/fredrikaverpil/go-microservice/internal/middleware"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
@@ -41,8 +43,21 @@ func NewGatewayServer(
 		return nil, err
 	}
 
+	swaggerHandler := SwaggerHandler(logger)
+
+	mainHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Route Swagger UI and OpenAPI spec requests
+		if config.IsDevelopment() && (strings.HasPrefix(r.URL.Path, "/docs") || r.URL.Path == "/api/openapi.yaml") {
+			swaggerHandler.ServeHTTP(w, r)
+			return
+		}
+
+		// All other paths go to the gRPC-gateway
+		mux.ServeHTTP(w, r)
+	})
+
 	// Wrap mux with middlewares
-	handler := middleware.WithHTTPMiddlewares(mux, middleware.HTTPServerMiddlewares(logger)...)
+	handler := middleware.WithHTTPMiddlewares(mainHandler, middleware.HTTPServerMiddlewares(logger)...)
 
 	server := &http.Server{
 		Addr:              ":" + port,
