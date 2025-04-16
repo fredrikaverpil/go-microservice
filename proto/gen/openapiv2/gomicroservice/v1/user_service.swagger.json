@@ -53,7 +53,7 @@
           },
           {
             "name": "filter",
-            "description": "A string value to restrict results based on a specific field.\nFor example: \"display_name=John\" or \"email=john@example.com\"",
+            "description": "A string value to restrict results based on a specific field.\nFor example:\ndisplay_name=John\nemail=johnexample.com",
             "in": "query",
             "required": false,
             "type": "string"

@@ -32,7 +32,9 @@ paths:
                   in: query
                   description: |-
                     A string value to restrict results based on a specific field.
-                     For example: "display_name=John" or "email=john@example.com"
+                     For example:
+                     display_name=John
+                     email=johnexample.com
                   schema:
                     type: string
             responses:

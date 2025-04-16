@@ -35,3 +35,31 @@ jobs:
             echo "Generated files differ from committed files. Please run 'make buf-generate' and commit the changes."
             exit 1
           fi
+  openapi:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+      - uses: actions/cache@v4
+        with:
+          path: |
+            /home/runner/.cache/go-build
+            /home/runner/go/pkg/mod
+            /home/runner/go/bin
+          key: ${{ runner.os }}-${{ github.ref_name }}-${{ github.workflow }}-${{ github.job }}-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ github.base_ref }}-${{ github.workflow }}-${{ github.job }}-${{ hashFiles('**/go.sum') }}
+      - name: install proto-tools
+        run: make openapi-tools
+      - name: generate docs
+        run: make openapi-docs-static
+      - name: no diff verification
+        run: |
+          git diff --exit-code
+          if [ $? -ne 0 ]; then
+            echo "Generated files differ from committed files. Please run 'make openapi-docs-static' and commit the changes."
+            exit 1
+          fi

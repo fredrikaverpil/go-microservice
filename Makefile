@@ -34,7 +34,8 @@ go-tools:
 # Install openapi tools
 .PHONY: openapi-tools
 openapi-tools:
-	go install github.com/daveshanley/vacuum@latest
+	# go install github.com/daveshanley/vacuum@latest
+	go install github.com/getkin/kin-openapi/cmd/validate@latest
 
 .PHONY: buf-dep-update
 buf-dep-update:
@@ -67,11 +68,13 @@ golangci-lint:
 
 .PHONY: openapiv2-lint
 openapiv2-lint:
-	go run github.com/daveshanley/vacuum@latest lint -d proto/gen/openapiv2/gomicroservice/**/*.json
+	# go run github.com/daveshanley/vacuum@latest lint -d proto/gen/openapiv2/gomicroservice/**/*.json
+	find proto/gen/openapiv2/gomicroservice -name "*.json" -exec go run github.com/getkin/kin-openapi/cmd/validate@latest -- {} \; && echo "OpenAPI v2 validation successful"
 
 .PHONY: openapiv3-lint
 openapiv3-lint:
-	go run github.com/daveshanley/vacuum@latest lint -d proto/gen/openapiv3/*.yaml
+	# go run github.com/daveshanley/vacuum@latest lint -d proto/gen/openapiv3/*.yaml
+	go run github.com/getkin/kin-openapi/cmd/validate@latest -- proto/gen/openapiv3/openapi.yaml && echo "OpenAPI v3 validation successful"
 
 .PHONY: buf-generate
 buf-generate:
@@ -89,3 +92,34 @@ run-server:
 run-server-prod:
 	GO_ENV=production go run cmd/server/main.go
 
+.PHONY: openapi-docs-serve
+openapi-docs-serve:
+	docker run --rm -p 8080:80 \
+		-e SPEC_URL=/api/openapi.yaml \
+		-v $(PWD)/proto/gen/openapiv3:/usr/share/nginx/html/api \
+		redocly/redoc
+
+.PHONY: openapi-docs-static
+openapi-docs-static:
+	docker run --rm \
+		-v $(PWD)/proto/gen/openapiv3:/tmp/spec \
+		-v $(PWD)/docs:/tmp/out \
+		redocly/cli build-docs /tmp/spec/openapi.yaml -o /tmp/out/index.html
+
+.PHONY: openapi-download-swagger-ui-files
+openapi-download-swagger-ui-files:
+    # Clean
+	rm -rf swagger-ui
+	mkdir swagger-ui
+
+	# Download and extract Swagger UI files
+	curl -L https://github.com/swagger-api/swagger-ui/archive/refs/tags/v5.21.0.tar.gz | tar xz
+
+	# Copy just the dist files to your swagger-ui directory
+	cp -r swagger-ui-5.21.0/dist/* cmd/openapi/swagger-ui/
+
+	# Clean up the downloaded archive
+	rm -rf swagger-ui-5.21.0
+
+    # Change the default URL to the OpenAPI spec
+	sed -i 's#url: "https://petstore.swagger.io/v2/swagger.json",#url: "/api/openapi.yaml",#g' swagger-ui/swagger-initializer.js

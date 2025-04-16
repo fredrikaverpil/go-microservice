@@ -42,7 +42,14 @@ grpcurl -plaintext -d '{"name":"users/user123"}' \
   localhost:50051 gomicroservice.v1.UserService/DeleteUser
 ```
 
-#### REST APIs with curl
+#### REST APIs with Swagger UI or curl
+
+You can access the Swagger UI at `http://localhost:8080/docs`.
+
+> [[!NOTE]
+>
+> The commands below are slightly wrong. See the Swagger UI for the proper
+> commands. I need to update this section!
 
 ```bash
 # Create a user with server-assigned ID

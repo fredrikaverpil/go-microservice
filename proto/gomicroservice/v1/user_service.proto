@@ -130,7 +130,9 @@ message ListUsersRequest {
   string page_token = 2 [(google.api.field_behavior) = OPTIONAL];
 
   // A string value to restrict results based on a specific field.
-  // For example: "display_name=John" or "email=john@example.com"
+  // For example:
+  // display_name=John
+  // email=johnexample.com
   string filter = 3 [(google.api.field_behavior) = OPTIONAL];
 }
 

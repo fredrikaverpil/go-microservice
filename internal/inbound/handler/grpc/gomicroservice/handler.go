@@ -18,10 +18,10 @@ import (
 type GRPCHandler struct {
 	gomicroservicev1.UnimplementedUserServiceServer
 	userService port.UserService
-	validator   *protovalidate.Validator
+	validator   protovalidate.Validator
 }
 
-func NewGRPCHandler(userService port.UserService, validator *protovalidate.Validator) *GRPCHandler {
+func NewGRPCHandler(userService port.UserService, validator protovalidate.Validator) *GRPCHandler {
 	return &GRPCHandler{
 		userService: userService,
 		validator:   validator,

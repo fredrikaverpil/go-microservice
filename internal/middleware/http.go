@@ -20,6 +20,7 @@ func WithHTTPMiddlewares(handler http.Handler, middlewares ...HTTPMiddleware) ht
 func HTTPServerMiddlewares(logger *slog.Logger) []HTTPMiddleware {
 	return []HTTPMiddleware{
 		// circuitBreakerMiddleware(),
+		corsMiddleware(),
 		loggingMiddleware(logger),
 		// rateLimitMiddleware(100),
 		// metricMiddleware(),
