@@ -1,4 +1,4 @@
-package db
+package db_test
 
 import (
 	"context"
@@ -9,6 +9,7 @@ import (
 
 	"github.com/fredrikaverpil/go-microservice/internal/core/domain"
 	gomicroservicev1 "github.com/fredrikaverpil/go-microservice/internal/gen/gomicroservice/v1"
+	"github.com/fredrikaverpil/go-microservice/internal/outbound/db"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"gotest.tools/v3/assert"
 )
@@ -20,9 +21,9 @@ var ignoredTimeFields = cmpopts.IgnoreFields( //nolint:gochecknoglobals // this 
 	"UpdateTime",
 )
 
-func setupTestRepo(_ *testing.T) *MemoryRepository {
+func setupTestRepo(_ *testing.T) *db.MemoryRepository {
 	logger := slog.Default()
-	repo := NewMemoryRepository(logger).(*MemoryRepository)
+	repo := db.NewMemoryRepository(logger).(*db.MemoryRepository)
 	return repo
 }
 

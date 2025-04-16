@@ -29,7 +29,7 @@ go-tools:
 	# AIP convenience functions, such as pagination, resourcename etc.
 	# go get -u go.einride.tech/aip
 
-	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+	go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.1.2
 
 # Install openapi tools
 .PHONY: openapi-tools

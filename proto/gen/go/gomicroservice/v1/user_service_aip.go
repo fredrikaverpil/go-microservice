@@ -56,3 +56,7 @@ func (n *UserResourceName) UnmarshalString(name string) error {
 	}
 	return n.Validate()
 }
+
+func (n UserResourceName) Type() string {
+	return "gomicroservice/User"
+}

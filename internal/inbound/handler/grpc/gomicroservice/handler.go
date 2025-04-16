@@ -49,11 +49,11 @@ func (h *GRPCHandler) CreateUser(
 	}
 	if req.GetUserId() != "" {
 		// If user_id is provided, use it
-		userId := req.GetUserId() //nolint:revive,stylecheck // userId is valid as it was generated.
-		if err := resourceid.ValidateUserSettable(userId); err != nil {
+		userID := req.GetUserId()
+		if err := resourceid.ValidateUserSettable(userID); err != nil {
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
-		user.Name = "users/" + userId
+		user.Name = "users/" + userID
 	} else {
 		// Generate a new name using the proper format
 		user.Name = "users/" + resourceid.NewSystemGeneratedBase32()
@@ -113,7 +113,7 @@ func (h *GRPCHandler) ListUsers(
 	}
 
 	// List
-	pageSize := int32(10) // Default page size
+	pageSize := int32(10) //nolint:mnd // Default page size
 	if req.GetPageSize() > 0 {
 		pageSize = req.GetPageSize()
 	}

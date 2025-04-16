@@ -13,6 +13,10 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
+const (
+	readHeaderTimeout = 5 * time.Second
+)
+
 type GatewayServer struct {
 	server *http.Server
 	logger *slog.Logger
@@ -43,7 +47,7 @@ func NewGatewayServer(
 	server := &http.Server{
 		Addr:              ":" + port,
 		Handler:           handler,
-		ReadHeaderTimeout: 5 * time.Second,
+		ReadHeaderTimeout: readHeaderTimeout,
 	}
 
 	return &GatewayServer{
