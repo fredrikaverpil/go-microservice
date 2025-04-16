@@ -4,7 +4,16 @@ updates:
     directory: /
     schedule:
       interval: monthly
+    groups:
+      actions:
+        patterns: ["*"]
   - package-ecosystem: gomod
-    directory: /
+    directories:
+      - /
     schedule:
       interval: monthly
+    allow:
+      - dependency-type: indirect
+    groups:
+      go:
+        patterns: ["*"]
